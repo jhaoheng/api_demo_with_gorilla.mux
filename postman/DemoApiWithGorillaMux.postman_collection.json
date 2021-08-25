@@ -1,0 +1,354 @@
+{
+	"info": {
+		"_postman_id": "d4aee6a6-7e81-4662-8694-ca7d4d7056d7",
+		"name": "DemoApiWithGorillaMux",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "get CSRF token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.environment.set(\"X-CSRF-Token\", postman.getResponseHeader(\"X-Csrf-Token\"))"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host}}/csrf",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"csrf"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "signup",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-CSRF-Token",
+						"value": "{{X-CSRF-Token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"account\": \"max\",\n    \"password\": \"max\",\n    \"fullname\": \"max\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/signup",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"signup"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "signin",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"console.log(jsonData.data);",
+							"",
+							"pm.environment.set(\"authorization\", jsonData.data.token);",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-CSRF-Token",
+						"value": "{{X-CSRF-Token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"account\": \"max\",\n    \"password\": \"max\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/signin",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"signin"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "list all users",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{host}}/users?paging=1&sorting=desc",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"users"
+					],
+					"query": [
+						{
+							"key": "paging",
+							"value": "1"
+						},
+						{
+							"key": "sorting",
+							"value": "desc"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "search user by fullname",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.environment.set(\"fullname\", \"max\");"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{host}}/user/fullname/{{fullname}}",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"user",
+						"fullname",
+						"{{fullname}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get user detail info",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{host}}/user/me",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"user",
+						"me"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete account",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.environment.set(\"del_account\", \"max2\");"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization}}",
+						"type": "text"
+					},
+					{
+						"key": "X-CSRF-Token",
+						"value": "{{X-CSRF-Token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{host}}/user/account/{{del_account}}",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"user",
+						"account",
+						"{{del_account}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update me",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization}}",
+						"type": "text"
+					},
+					{
+						"key": "X-CSRF-Token",
+						"value": "{{X-CSRF-Token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"fullname\":\"max\",\n    \"password\":\"max\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/user/me",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"user",
+						"me"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update specific user fullname",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.environment.set(\"update_account\", \"max\");"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization}}",
+						"type": "text"
+					},
+					{
+						"key": "X-CSRF-Token",
+						"value": "{{X-CSRF-Token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"fullname\":\"1234\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/user/account/{{update_account}}",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"user",
+						"account",
+						"{{update_account}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

@@ -1,0 +1,669 @@
+{
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "swagger": "2.0",
+  "info": {
+    "description": "This docs only work with docker env",
+    "contact": {
+      "name": "MaxHu",
+      "url": "https://github.com/jhaoheng",
+      "email": "jhaoheng@gmail.com"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "http://opensource.org/licenses/MIT"
+    },
+    "version": "0.0.1"
+  },
+  "host": "localhost",
+  "basePath": "/",
+  "paths": {
+    "/csrf": {
+      "get": {
+        "description": "To operate the apis, get CSRF token at beginning\n```\ncurl -X GET 'https://localhost/csrf' --insecure\n```",
+        "operationId": "GetCSRFToken",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "string"
+                }
+              },
+              "example": {
+                "data": "success",
+                "error": ""
+              }
+            },
+            "headers": {
+              "X-CSRF-Token": {
+                "description": "CSRF Token"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/signin": {
+      "post": {
+        "description": "will return jwt token\n```\ncurl -X POST 'https://localhost/signin' \\\n-H 'X-CSRF-Token: {{X-CSRF-Token}}' \\\n-H 'Content-Type: application/json' \\\n-d '{\n\"account\": \"\",\n\"password\": \"\"\n}' \\\n--insecure\n```",
+        "tags": [
+          "auth"
+        ],
+        "summary": "signin",
+        "operationId": "SignIn",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "account",
+                "password"
+              ],
+              "properties": {
+                "account": {
+                  "type": "string"
+                },
+                "password": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object"
+                },
+                "error": {
+                  "type": "string"
+                }
+              },
+              "example": {
+                "data": {
+                  "token": "..."
+                },
+                "error": ""
+              }
+            }
+          },
+          "400": {
+            "description": "something wrong",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "nullable": true
+                },
+                "error": {
+                  "type": "string"
+                }
+              },
+              "example": {
+                "data": null,
+                "error": "the error detail..."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/signup": {
+      "post": {
+        "description": "create an user\n```\ncurl -X POST 'https://localhost/signup' \\\n-H 'X-CSRF-Token: {{X-CSRF-Token}}' \\\n-H 'Content-Type: application/json' \\\n-d '{\n\"account\": \"\",\n\"password\": \"\",\n\"fullname\": \"\"\n}' \\\n--insecure\n```",
+        "tags": [
+          "auth"
+        ],
+        "summary": "signup",
+        "operationId": "Signup",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "account",
+                "password",
+                "fullname"
+              ],
+              "properties": {
+                "account": {
+                  "type": "string"
+                },
+                "fullname": {
+                  "type": "string"
+                },
+                "password": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "string"
+                }
+              },
+              "example": {
+                "data": "success",
+                "error": ""
+              }
+            }
+          },
+          "400": {
+            "description": "something wrong",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "nullable": true
+                },
+                "error": {
+                  "type": "string"
+                }
+              },
+              "example": {
+                "data": null,
+                "error": "the error detail..."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/account/{account}": {
+      "delete": {
+        "description": "delete user\n```\ncurl -X DELETE 'https://localhost/user/account/{{account}}' \\\n-H 'Authorization: {{Authorization}}' \\\n-H 'X-CSRF-Token: {{X-CSRF-Token}}' \\\n-H 'Cookie: {{Cookie}}' \\\n--insecure\n```",
+        "tags": [
+          "user"
+        ],
+        "operationId": "delete_user",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "account",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "string"
+                }
+              },
+              "example": {
+                "data": "success",
+                "error": ""
+              }
+            }
+          },
+          "400": {
+            "description": "something wrong",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "nullable": true
+                },
+                "error": {
+                  "type": "string"
+                }
+              },
+              "example": {
+                "data": null,
+                "error": "the error detail..."
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "description": "update specific user fullname\n```\ncurl -X PATCH 'https://localhost/user/account/{{account}}' \\\n-H 'Authorization: {{Authorization}}' \\\n-H 'X-CSRF-Token: {{X-CSRF-Token}}' \\\n-H 'Content-Type: application/json' \\\n-d '{\n\"fullname\":\"\"\n}' \\\n--insecure\n```",
+        "tags": [
+          "user"
+        ],
+        "operationId": "update_specific_user_fullname",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "fullname"
+              ],
+              "properties": {
+                "fullname": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object"
+                },
+                "error": {
+                  "type": "string"
+                }
+              },
+              "example": {
+                "data": {
+                  "account": "",
+                  "created_at": "",
+                  "fullname": "",
+                  "updated_at": ""
+                },
+                "error": ""
+              }
+            }
+          },
+          "400": {
+            "description": "something wrong",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "nullable": true
+                },
+                "error": {
+                  "type": "string"
+                }
+              },
+              "example": {
+                "data": null,
+                "error": "the error detail..."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/fullname/{fullname}": {
+      "get": {
+        "description": "search user by fullname\n```\ncurl -X GET 'https://localhost/user/fullname/{{fullname}}' \\\n-H 'Authorization: {{Authorization}}' \\\n--insecure\n```",
+        "tags": [
+          "user"
+        ],
+        "operationId": "search_user_by_fullname",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "fullname",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object"
+                },
+                "error": {
+                  "type": "string"
+                }
+              },
+              "example": {
+                "data": {
+                  "account": "",
+                  "created_at": "",
+                  "fullname": "",
+                  "updated_at": ""
+                },
+                "error": ""
+              }
+            }
+          },
+          "400": {
+            "description": "something wrong",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "nullable": true
+                },
+                "error": {
+                  "type": "string"
+                }
+              },
+              "example": {
+                "data": null,
+                "error": "the error detail..."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/me": {
+      "get": {
+        "description": "get user detail info\n```\ncurl -X GET 'https://localhost/user/me' \\\n-H 'Authorization: {{Authorization}}' \\\n--insecure\n```",
+        "tags": [
+          "user"
+        ],
+        "operationId": "get_user_detail_info",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object"
+                },
+                "error": {
+                  "type": "string"
+                }
+              },
+              "example": {
+                "data": {
+                  "account": "",
+                  "created_at": "",
+                  "fullname": "",
+                  "updated_at": ""
+                },
+                "error": ""
+              }
+            }
+          },
+          "400": {
+            "description": "something wrong",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "nullable": true
+                },
+                "error": {
+                  "type": "string"
+                }
+              },
+              "example": {
+                "data": null,
+                "error": "the error detail..."
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "description": "update me, could update password or fullname\n```\ncurl -X PATCH 'https://localhost/user/me' \\\n-H 'Authorization: {{Authorization}}' \\\n-H 'X-CSRF-Token: {{X-CSRF-Token}}' \\\n-H 'Content-Type: application/json' \\\n-d '{\n\"fullname\":\"\",\n\"password\":\"\"\n}' \\\n--insecure\n```",
+        "tags": [
+          "user"
+        ],
+        "operationId": "update_me",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "fullname": {
+                  "type": "string"
+                },
+                "password": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object"
+                },
+                "error": {
+                  "type": "string"
+                }
+              },
+              "example": {
+                "data": {
+                  "account": "",
+                  "created_at": "",
+                  "fullname": "",
+                  "updated_at": ""
+                },
+                "error": ""
+              }
+            }
+          },
+          "400": {
+            "description": "something wrong",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "nullable": true
+                },
+                "error": {
+                  "type": "string"
+                }
+              },
+              "example": {
+                "data": null,
+                "error": "the error detail..."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "description": "list all users\n```\ncurl -X GET 'https://localhost/users?paging=1\u0026sorting=desc' \\\n-H 'Authorization: {{Authorization}}' \\\n--insecure\n```",
+        "tags": [
+          "user"
+        ],
+        "operationId": "list_all_users",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "Authorization",
+            "in": "header",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true
+          },
+          {
+            "default": 1,
+            "name": "paging",
+            "in": "query"
+          },
+          {
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "default": "asc",
+            "name": "sorting",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array"
+                },
+                "error": {
+                  "type": "string"
+                }
+              },
+              "example": {
+                "data": {
+                  "total": 1,
+                  "users": [
+                    {
+                      "account": "",
+                      "created_at": "",
+                      "fullname": "",
+                      "updated_at": ""
+                    }
+                  ]
+                },
+                "error": ""
+              }
+            }
+          },
+          "400": {
+            "description": "something wrong",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "nullable": true
+                },
+                "error": {
+                  "type": "string"
+                }
+              },
+              "example": {
+                "data": null,
+                "error": "the error detail..."
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

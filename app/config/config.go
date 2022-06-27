@@ -49,8 +49,8 @@ func (c *ConfigObj) setDev() {
 		c.CSRFTOKEN_ONLY_HTTPS = true
 	}
 	//
-	c.JWT_PUBLIC_KEY_PATH = "/tmp/localhost/docker-compose/keypair/jwtRS256.key.pub"
-	c.JWT_PRIVATE_KEY_PATH = "/tmp/localhost/docker-compose/keypair/jwtRS256.key"
+	c.JWT_PUBLIC_KEY_PATH = "/tmp/localhost/docker-compose/keypair/jwt_rs256.key.pub"
+	c.JWT_PRIVATE_KEY_PATH = "/tmp/localhost/docker-compose/keypair/jwt_rs256.key"
 }
 
 func (c *ConfigObj) setStg() {

@@ -7,8 +7,8 @@ import (
 
 func Test_JWT(t *testing.T) {
 
-	public_key_path := "../../keypair/jwtRS256.key.pub"
-	private_key_path := "../../keypair/jwtRS256.key"
+	public_key_path := "../../keypair/jwt_rs256.key.pub"
+	private_key_path := "../../keypair/jwt_rs256.key"
 
 	jwtsrv := NewJWTSrv(public_key_path, private_key_path)
 	tokenSting := jwtsrv.Encrtpying("maxhu")
@@ -21,6 +21,6 @@ func Test_JWT(t *testing.T) {
 }
 
 func Test_setPublicKey(t *testing.T) {
-	path := "../../keypair/jwtRS256.key.pub"
+	path := "../../keypair/jwt_rs256.key.pub"
 	fmt.Println(setPublicKey(path))
 }

@@ -13,5 +13,8 @@
 			"path": "swaggerdoc"
 		}
 	],
-	"settings": {}
+	"settings": {
+    "editor.detectIndentation": false,
+    "editor.tabSize": 4
+	}
 }

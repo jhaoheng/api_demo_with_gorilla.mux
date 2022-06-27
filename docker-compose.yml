@@ -14,7 +14,7 @@ services:
       - 80:80
       - 443:443
     networks:
-      - demoApiNetwork
+      - api_network
 
   app:
     image: golang:1.16.5
@@ -32,7 +32,7 @@ services:
     working_dir : /go/src/app
     command: sh -c "go run main.go"
     networks:
-      - demoApiNetwork
+      - api_network
 
   postgres:
     image: postgres:13.3
@@ -46,8 +46,8 @@ services:
       - POSTGRES_PASSWORD=ui_test
       - POSTGRES_DB=ui_test
     networks:
-      - demoApiNetwork
+      - api_network
     
 networks:
-  demoApiNetwork:
-    name: demoApiNetwork
+  api_network:
+    name: api_network

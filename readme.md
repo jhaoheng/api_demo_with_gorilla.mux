@@ -7,16 +7,14 @@
 - golang 1.16.5
 - gorilla/mux, v1.8.0
 - gorm, v1.21.11
-- securities
-    - XSS
-    - CSRF
-    - JWT Authorization
 - postman, collection v2.1, newman, 5.3.2
 - Docker version 20.10.6, build 370c289
 - docker-compose version 1.29.1, build c34c88b2
 
 # Serivce securities
 - HTTPS
+- CSRF
+- JWT Authorization
 - XSS protection
 - HSTS Protection
 - Forbidden to show nginx's version

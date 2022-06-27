@@ -30,16 +30,21 @@ func ListAllUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//
-	users := models.USERS{}
-	var total int64 = 0
-	if err := users.ListBy(listAllUsersObj.Paging, listAllUsersObj.Sorting, 10, &total); err != nil {
+	user := models.NewUser()
+	total, err := user.GetAllCount()
+	if err != nil {
+		modules.NewResp(w, r).SetError(err, http.StatusBadRequest)
+		return
+	}
+	results, err := user.ListBy(listAllUsersObj.Paging, listAllUsersObj.Sorting, 10)
+	if err != nil {
 		modules.NewResp(w, r).SetError(err, http.StatusBadRequest)
 		return
 	}
 
 	//
 	datas := make([]map[string]string, 0)
-	for _, user := range users {
+	for _, user := range results {
 		data := map[string]string{
 			"account":    user.Acct,
 			"fullname":   user.Fullname,

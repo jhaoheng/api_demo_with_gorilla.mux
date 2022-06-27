@@ -33,8 +33,10 @@ func JWTValidate(next http.Handler) http.Handler {
 			return
 		}
 		//
-		user := models.USER{}
-		if err := user.GetUserDetail(account); err != nil {
+		user := models.NewUser()
+		user.SetAcct(account)
+		_, err := user.Get()
+		if err != nil {
 			err = errors.New("forbidden, authorization fail")
 			modules.NewResp(w, r).SetError(err, http.StatusForbidden)
 			return

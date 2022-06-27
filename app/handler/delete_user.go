@@ -34,9 +34,8 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := models.USER{
-		Acct: deleteUserObj.DelAccount,
-	}
+	user := models.NewUser()
+	user.SetAcct(deleteUserObj.DelAccount)
 	if rowsAffected, err := user.Delete(); err != nil {
 		modules.NewResp(w, r).SetError(err, http.StatusBadRequest)
 		return

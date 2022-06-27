@@ -35,13 +35,10 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//
-	user := models.USER{
-		Acct:     createUserObj.Account,
-		Pwd:      modules.HashPasswrod(createUserObj.Password),
-		Fullname: createUserObj.Fullname,
-	}
-
-	if err := user.Create(); err != nil {
+	user := models.NewUser()
+	if err = user.SetAcct(createUserObj.Account).
+		SetFullname(createUserObj.Fullname).
+		SetPwd(modules.HashPasswrod(createUserObj.Password)).Create(); err != nil {
 		if strings.Contains(err.Error(), "duplicate key") {
 			modules.NewResp(w, r).SetError(err, http.StatusBadRequest)
 		} else {

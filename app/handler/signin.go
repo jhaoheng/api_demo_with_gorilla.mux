@@ -35,15 +35,16 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//
-	user := models.USER{}
-	if err := user.GetUserDetail(signinObj.Account); err != nil {
+	user := models.NewUser()
+	result, err := user.SetAcct(signinObj.Account).Get()
+	if err != nil {
 		modules.NewResp(w, r).SetError(err, http.StatusBadRequest)
 		signinFialNotify(err, r.RequestURI, signinObj.Account)
 		return
 	}
 	//
 	hashPwd := modules.HashPasswrod(signinObj.Password)
-	if !strings.EqualFold(hashPwd, user.Pwd) {
+	if !strings.EqualFold(hashPwd, result.Pwd) {
 		err := errors.New("password error")
 		modules.NewResp(w, r).SetError(err, http.StatusBadRequest)
 		signinFialNotify(err, r.RequestURI, signinObj.Account)

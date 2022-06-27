@@ -35,10 +35,12 @@ func UpdateSpecificUserFullname(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//
-	user := models.USER{
-		Acct: updateObj.Account,
-	}
-	if rowsAffected, err := user.Update("", updateObj.Fullname); err != nil {
+	user := models.NewUser()
+	user.SetAcct(updateObj.Account)
+	rowsAffected, err := user.Update(models.User{
+		Fullname: updateObj.Fullname,
+	})
+	if err != nil {
 		modules.NewResp(w, r).SetError(err, http.StatusBadRequest)
 		return
 	} else if rowsAffected == 0 {
@@ -46,13 +48,21 @@ func UpdateSpecificUserFullname(w http.ResponseWriter, r *http.Request) {
 		modules.NewResp(w, r).SetError(err, http.StatusBadRequest)
 		return
 	}
-	user.GetUserDetail(updateObj.Account)
 
+	//
+	user = models.NewUser()
+	result, err := user.SetAcct(updateObj.Account).Get()
+	if err != nil {
+		modules.NewResp(w, r).SetError(err, http.StatusBadRequest)
+		return
+	}
+
+	//
 	data := map[string]string{
-		"account":    user.Acct,
-		"fullname":   user.Fullname,
-		"create_at":  user.CreatedAt.String(),
-		"updated_at": user.UpdatedAt.String(),
+		"account":    result.Acct,
+		"fullname":   result.Fullname,
+		"create_at":  result.CreatedAt.String(),
+		"updated_at": result.UpdatedAt.String(),
 	}
 	modules.NewResp(w, r).SetSuccess(data)
 }

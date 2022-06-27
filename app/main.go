@@ -31,7 +31,13 @@ func init() {
 		})
 	}
 	c := config.NewConfig(env)
-	models.NewDBConnection(c.DB_HOST, c.DB_USERNAME, c.DB_PASSWORD, c.DB_NAME)
+	models.NewDBMySQL(models.DBSet{
+		Host:    c.DB_HOST,
+		User:    c.DB_USERNAME,
+		Pass:    c.DB_PASSWORD,
+		DBName:  c.DB_NAME,
+		IsDebug: true,
+	})
 }
 
 func main() {

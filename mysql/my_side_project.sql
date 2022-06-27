@@ -1,0 +1,49 @@
+#
+# SQL Export
+# Created by Querious (201069)
+# Created: June 27, 2022 at 3:03:13 PM GMT+8
+# Encoding: Unicode (UTF-8)
+#
+
+
+CREATE DATABASE IF NOT EXISTS `my_side_project` DEFAULT CHARACTER SET utf8mb4 DEFAULT COLLATE utf8mb4_unicode_ci;
+USE `my_side_project`;
+
+
+
+
+SET @PREVIOUS_FOREIGN_KEY_CHECKS = @@FOREIGN_KEY_CHECKS;
+SET FOREIGN_KEY_CHECKS = 0;
+
+
+CREATE TABLE `user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `acct` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `pwd` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `fullname` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `created_at` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `updated_at` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+
+
+SET FOREIGN_KEY_CHECKS = @PREVIOUS_FOREIGN_KEY_CHECKS;
+
+
+SET @PREVIOUS_FOREIGN_KEY_CHECKS = @@FOREIGN_KEY_CHECKS;
+SET FOREIGN_KEY_CHECKS = 0;
+
+
+LOCK TABLES `user` WRITE;
+ALTER TABLE `user` DISABLE KEYS;
+ALTER TABLE `user` ENABLE KEYS;
+UNLOCK TABLES;
+
+
+
+
+SET FOREIGN_KEY_CHECKS = @PREVIOUS_FOREIGN_KEY_CHECKS;
+
+

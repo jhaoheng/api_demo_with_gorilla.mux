@@ -25,17 +25,18 @@ func SearchUserByFullname(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//
-	user := models.USER{}
-	if err := user.SearchByFullname(searchUserByFullnameObj.Fullname); err != nil {
+	user := models.NewUser()
+	result, err := user.SetFullname(searchUserByFullnameObj.Fullname).Get()
+	if err != nil {
 		modules.NewResp(w, r).SetError(err, http.StatusBadRequest)
 		return
 	}
 
 	data := map[string]string{
-		"account":    user.Acct,
-		"fullname":   user.Fullname,
-		"create_at":  user.CreatedAt.String(),
-		"updated_at": user.UpdatedAt.String(),
+		"account":    result.Acct,
+		"fullname":   result.Fullname,
+		"create_at":  result.CreatedAt.String(),
+		"updated_at": result.UpdatedAt.String(),
 	}
 	modules.NewResp(w, r).SetSuccess(data)
 }

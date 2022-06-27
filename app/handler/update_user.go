@@ -41,21 +41,30 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 	//
 	account := context.Get(r, "account").(string)
-	user := models.USER{
-		Acct: account,
-	}
-	if _, err := user.Update(modules.HashPasswrod(obj.Password), obj.Fullname); err != nil {
+	user := models.NewUser()
+	user.SetAcct(account)
+	_, err = user.Update(models.User{
+		Pwd:      modules.HashPasswrod(obj.Password),
+		Fullname: obj.Fullname,
+	})
+	if err != nil {
 		modules.NewResp(w, r).SetError(err, http.StatusBadRequest)
 		return
 	}
-	user.GetUserDetail(account)
+	//
+	user = models.NewUser()
+	result, err := user.SetAcct(account).Get()
+	if err != nil {
+		modules.NewResp(w, r).SetError(err, http.StatusBadRequest)
+		return
+	}
 
 	//
 	data := map[string]string{
-		"account":    user.Acct,
-		"fullname":   user.Fullname,
-		"create_at":  user.CreatedAt.String(),
-		"updated_at": user.UpdatedAt.String(),
+		"account":    result.Acct,
+		"fullname":   result.Fullname,
+		"create_at":  result.CreatedAt.String(),
+		"updated_at": result.UpdatedAt.String(),
 	}
 	modules.NewResp(w, r).SetSuccess(data)
 }

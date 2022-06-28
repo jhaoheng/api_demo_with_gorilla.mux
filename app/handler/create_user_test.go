@@ -12,7 +12,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gorilla/context"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/suite"
 )
@@ -24,10 +23,9 @@ import (
 - run: `go test -run TestCreateUser` or `go test -v ./...`
 */
 type SuiteCreateUserTestPlan struct {
-	Account       string
-	Password      string
-	Fullname      string
-	AccessAccount string
+	Account  string
+	Password string
+	Fullname string
 }
 
 type SuiteCreateUser struct {
@@ -59,17 +57,13 @@ func (s *SuiteCreateUser) TestDo() {
 		fmt.Printf("\n=== %v ===\n", index)
 		//
 		req, err := http.NewRequest(s.ApiMethod, s.ApiUrl, func() io.Reader {
-			b, _ := json.Marshal(CreateUserBody{
-				Account:  test_plan.Account,
-				Password: test_plan.Password,
-				Fullname: test_plan.Fullname,
-			})
+			b, _ := json.Marshal(test_plan)
 			return bytes.NewBuffer(b)
 		}())
 		if !s.NoError(err) {
 			s.T().Fatal(err)
 		}
-		context.Set(req, "account", test_plan.AccessAccount)
+		// context.Set(req, "account", test_plan.AccessAccount)
 		rr := httptest.NewRecorder()
 
 		//

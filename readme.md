@@ -1,7 +1,17 @@
-# API demo, 目的
+# API demo
 - 使用 Golang 的框架 gorilla/mux framework
+- 使用 RS256 來產生 keypair, 透過 JWT 進行認證
+- 使用 mock, 來達成 api unit test
 - 使用 swagger 來產生 API 文件
-- 使用 RS256 來產生 keypair, 給 JWT 進行認證使用
+- 使用 postman/newman 自動化測試 APIs
+- Serivce securities
+    - HTTPS
+    - CSRF
+    - JWT Authorization
+    - XSS protection
+    - HSTS Protection
+    - Forbidden to show nginx's version
+    - SQL injection
 
 # 版本
 - golang 1.16.5
@@ -11,17 +21,8 @@
 - Docker version 20.10.6, build 370c289
 - docker-compose version 1.29.1, build c34c88b2
 
-# Serivce securities
-- HTTPS
-- CSRF
-- JWT Authorization
-- XSS protection
-- HSTS Protection
-- Forbidden to show nginx's version
-- SQL injection
-
 # 本地執行 API Service
-1. 產生 RS256 keypair
+1. 產生 RS256 keypair for JWT
     1. `cd keypair`
     2. `ssh-keygen -t rsa -b 4096 -m PEM -f jwt_rs256.key`, kepp the passphrase is empty.
     3. `openssl rsa -in jwt_rs256.key -pubout -outform PEM -out jwt_rs256.key.pub`  
@@ -32,11 +33,11 @@
 1. 執行本地 API service
 2. Run the client, `cd websocket_client && go run main.go`
 
-# run api unit test
+# Run API Unit Test
 1. 執行本地 API service
 2. `docker exec app go test ./...`
 
-# postman, newman, 執行自動測試
+# Postman/Newman, 執行自動測試
 1. 執行本地 API service
 2. import the file: `./postman/...` into your postman app.
 

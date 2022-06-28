@@ -20,7 +20,7 @@ type DeleteUser struct {
 }
 
 type DeleteUserPath struct {
-	DelAccount string
+	DelAccount string `validate:"required"`
 }
 type DeleteUserBody struct{}
 type DeleteUserResp struct{}
@@ -48,6 +48,11 @@ func (api *DeleteUser) do(w http.ResponseWriter, r *http.Request) (*DeleteUserRe
 	//
 	if err := modules.CheckRegex(api.path.DelAccount); err != nil {
 		return nil, http.StatusBadRequest, err
+	}
+
+	//
+	if err := modules.Validate(api.path); err != nil {
+		return nil, http.StatusUnprocessableEntity, err
 	}
 
 	//

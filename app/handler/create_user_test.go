@@ -23,10 +23,11 @@ import (
 - run: `go test -run TestCreateUser` or `go test -v ./...`
 */
 type SuiteCreateUserTestPlan struct {
-	Account  string
-	Password string
-	Fullname string
-	Expect   string
+	Account    string
+	Password   string
+	Fullname   string
+	ExpectCode int
+	ExpectBody string
 }
 
 type SuiteCreateUser struct {
@@ -41,22 +42,31 @@ func TestCreateUser(t *testing.T) {
 }
 
 func (s *SuiteCreateUser) BeforeTest(suiteName, testName string) {
-	logrus.Info("BeforeTest")
+	logrus.Info("BeforeTest,", s.T().Name())
 	s.ApiMethod = "POST"
 	s.ApiUrl = "/signup"
 	s.TestPlans = []SuiteCreateUserTestPlan{
 		0: {
-			Account:  "max",
-			Password: "12345",
-			Fullname: "maxhu",
-			Expect:   `{"data":{"account":"max","fullname":"maxhu","created_at":"2022-01-01 12:00:00","updated_at":"2022-01-01 12:00:00"},"error":"0"}`,
+			Account:    "max",
+			Password:   "12345",
+			Fullname:   "maxhu",
+			ExpectCode: http.StatusOK,
+			ExpectBody: `{"data":{"account":"max","fullname":"maxhu","created_at":"2022-01-01 12:00:00","updated_at":"2022-01-01 12:00:00"},"error":"0"}`,
+		},
+		1: {
+			Account:    "max",
+			Password:   "*",
+			Fullname:   "maxhu",
+			ExpectCode: http.StatusUnprocessableEntity,
+			ExpectBody: `{"data":null,"error":"Key: 'CreateUserBody.Password' Error:Field validation for 'Password' failed on the 'is_allow_password' tag"}`,
 		},
 	}
+	//
+	modules.InitValidate()
 }
 
 func (s *SuiteCreateUser) TestDo() {
-	for index, test_plan := range s.TestPlans {
-		fmt.Printf("\n=== %v ===\n", index)
+	for _, test_plan := range s.TestPlans {
 		//
 		req, err := http.NewRequest(s.ApiMethod, s.ApiUrl, func() io.Reader {
 			b, _ := json.Marshal(CreateUserBody{
@@ -88,19 +98,18 @@ func (s *SuiteCreateUser) TestDo() {
 		//
 		// fmt.Println("http status_code=>", rr.Code)
 		// fmt.Println("header=>", rr.Header())
-		// fmt.Println("body=>", rr.Body.String())
-		if rr.Code != http.StatusOK {
-			s.T().Fatalf("handler returned wrong status code: got %v want %v", rr.Code, http.StatusOK)
+		fmt.Println("body=>", rr.Body.String())
+		if rr.Code != test_plan.ExpectCode {
+			s.T().Fatalf("handler returned wrong status code: got %v want %v", rr.Code, test_plan.ExpectCode)
 		}
-		if rr.Body.String() != test_plan.Expect {
-			s.T().Fatalf("handler returned unexpected body: \n- got %v \n- want %v", rr.Body.String(), test_plan.Expect)
+		if rr.Body.String() != test_plan.ExpectBody {
+			s.T().Fatalf("handler returned unexpected body: \n- got %v \n- want %v", rr.Body.String(), test_plan.ExpectBody)
 		}
 	}
-	fmt.Println("")
 }
 
 func (s *SuiteCreateUser) AfterTest(suiteName, testName string) {
-	logrus.Info("AfterTest")
+	logrus.Info("AfterTest,", s.T().Name())
 }
 
 /*

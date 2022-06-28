@@ -22,7 +22,7 @@ type UpdateUserFullnamePath struct {
 }
 
 type UpdateUserFullnameBody struct {
-	Fullname string
+	Fullname string `validate:"required"`
 }
 
 type UpdateUserFullnameResp struct {
@@ -56,6 +56,13 @@ func UpdateUserFullnameHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *UpdateUserFullname) do() (*UpdateUserFullnameResp, int, error) {
+
+	//
+	if err := modules.Validate(api.body); err != nil {
+		return nil, http.StatusUnprocessableEntity, err
+	}
+
+	//
 	if err := modules.CheckRegex(api.body.Fullname, api.path.Account); err != nil {
 		return nil, http.StatusBadRequest, err
 	}

@@ -20,9 +20,9 @@ type CreateUserPath struct {
 }
 
 type CreateUserBody struct {
-	Account  string `json:"account"`
-	Password string `json:"password"`
-	Fullname string `json:"fullname"`
+	Account  string `json:"account" validate:"required"`
+	Password string `json:"password" validate:"required,is_allow_password"`
+	Fullname string `json:"fullname" validate:"required"`
 }
 
 type CreateUserResp struct {
@@ -54,6 +54,11 @@ func (api *CreateUser) do(w http.ResponseWriter, r *http.Request) (*CreateUserRe
 	err := decoder.Decode(&api.body)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
+	}
+
+	//
+	if err := modules.Validate(api.body); err != nil {
+		return nil, http.StatusUnprocessableEntity, err
 	}
 
 	//

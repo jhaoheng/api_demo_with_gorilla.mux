@@ -40,7 +40,7 @@
 			"}",
 			"",
 			"func (s *SuiteMyTestName) BeforeTest(suiteName, testName string) {",
-			"\tlogrus.Info(\"BeforeTest\", s.T().Name())",
+			"\tlogrus.Info(\"BeforeTest, \", s.T().Name())",
 			"}",
 			"",
 			"func (s *SuiteMyTestName) TestDo() {",
@@ -78,7 +78,7 @@
 			"}",
 			"",
 			"func (s *SuiteMyTestName) AfterTest(suiteName, testName string) {",
-			"\tlogrus.Info(\"AfterTest\", s.T().Name())",
+			"\tlogrus.Info(\"AfterTest, \", s.T().Name())",
 			"}"
 		],
 		"description": "description for mux_unit_test"

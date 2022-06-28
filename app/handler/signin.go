@@ -20,8 +20,8 @@ type Signin struct {
 
 type SigninPath struct{}
 type SigninBody struct {
-	Account  string `json:"account"`
-	Password string `json:"password"`
+	Account  string `json:"account" validate:"required"`
+	Password string `json:"password" validate:"required"`
 }
 type SigninResp struct {
 	Token string `json:"token"`
@@ -53,6 +53,11 @@ func SigninHandler(w http.ResponseWriter, r *http.Request) {
 func (api *Signin) do() (*SigninResp, int, error) {
 	if len(api.body.Account) == 0 || len(api.body.Password) == 0 {
 		err := fmt.Errorf("parameters lost")
+		return nil, http.StatusUnprocessableEntity, err
+	}
+
+	//
+	if err := modules.Validate(api.body); err != nil {
 		return nil, http.StatusUnprocessableEntity, err
 	}
 

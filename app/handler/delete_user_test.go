@@ -48,6 +48,8 @@ func (s *SuiteDeleteUser) BeforeTest(suiteName, testName string) {
 	s.ApiMethod = "DELETE"
 	s.ApiUrl = fmt.Sprintf("/account/%v", s.TestPlan.DelAccount)
 	s.TestPlan = test_plan
+	//
+	modules.InitValidate()
 }
 
 func (s *SuiteDeleteUser) TestDo() {

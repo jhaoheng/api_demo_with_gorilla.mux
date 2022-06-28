@@ -33,6 +33,20 @@ func (r *Resp) Set(resp RespContect) {
 	w.Header().Set("X-CSRF-Token", csrf.Token(r.request))
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(resp.Stutus)
-	b, _ := json.Marshal(resp)
+
+	type Content struct {
+		Data  interface{} `json:"data"`
+		Error string      `json:"error"`
+	}
+	tmp := Content{
+		Data: resp.Data,
+		Error: func() string {
+			if resp.Error != nil {
+				return resp.Error.Error()
+			}
+			return "0"
+		}(),
+	}
+	b, _ := json.Marshal(tmp)
 	w.Write(b)
 }

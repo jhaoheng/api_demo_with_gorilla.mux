@@ -8,6 +8,8 @@ import (
 )
 
 type IUser interface {
+	Or(users ...User) IUser
+	//
 	SetAcct(acct string) IUser
 	SetPwd(password string) IUser
 	SetFullname(fullname string) IUser
@@ -20,8 +22,6 @@ type IUser interface {
 	Update(user User) (rowsAffected int64, err error)
 	//
 	ListBy(paging, sorting string, page_size int) ([]User, error)
-	//
-	Or(users ...User) IUser
 }
 
 type User struct {
@@ -52,6 +52,16 @@ func (model *User) set_db() *gorm.DB {
 	return model.tx
 }
 
+//
+func (model *User) Or(users ...User) IUser {
+	tx := DB
+	for _, user := range users {
+		tx = tx.Or(user)
+	}
+	model.tx = model.set_db().Where(tx)
+	return model
+}
+
 func (model *User) SetAcct(acct string) IUser {
 	model.Acct = acct
 	return model
@@ -70,15 +80,6 @@ func (model *User) SetFullname(fullname string) IUser {
 // Create -
 func (model *User) Create() error {
 	return model.set_db().Create(&model).Error
-}
-
-func (model *User) Or(users ...User) IUser {
-	tx := DB
-	for _, user := range users {
-		tx = tx.Or(user)
-	}
-	model.tx = model.set_db().Where(tx)
-	return model
 }
 
 func (model *User) Get() (User, error) {

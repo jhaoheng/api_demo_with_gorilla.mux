@@ -65,3 +65,11 @@ func Test_User_AndOr(t *testing.T) {
 		}
 	}
 }
+
+func Test_User_Mock_Create(t *testing.T) {
+	mock_user := NewMockUser()
+	mock_user.On("SetAcct", "")
+	mock_user.On("SetPwd", "")
+	mock_user.On("SetFullname", "")
+	mock_user.On("Create").Return(nil)
+}

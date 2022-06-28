@@ -10,8 +10,6 @@ import (
 )
 
 type CreateUser struct {
-	w                 http.ResponseWriter
-	r                 *http.Request
 	path              *CreateUserPath
 	body              *CreateUserBody
 	model_create_user models.IUser
@@ -30,41 +28,29 @@ type CreateUserResult struct {
 }
 
 func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
-	body := &CreateUserBody{}
-	//
-	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(body)
-	if err != nil {
-		modules.NewResp(w, r).Set(modules.RespContect{Error: err, Stutus: http.StatusBadRequest})
-		return
-	}
-
-	//
 	api := CreateUser{
-		w:                 w,
-		r:                 r,
 		path:              &CreateUserPath{},
-		body:              body,
+		body:              &CreateUserBody{},
 		model_create_user: models.NewUser(),
 	}
-	status, err := api.do()
-	if err != nil {
-		modules.NewResp(w, r).Set(modules.RespContect{
-			Error:  err,
-			Stutus: status,
-		})
-		return
-	}
-
+	status, err := api.do(w, r)
 	//
-	payload := CreateUserResult{}
 	modules.NewResp(w, r).Set(modules.RespContect{
-		Data:   payload,
-		Stutus: http.StatusOK,
+		Data:   CreateUserResult{},
+		Stutus: status,
+		Error:  err,
 	})
 }
 
-func (api *CreateUser) do() (int, error) {
+func (api *CreateUser) do(w http.ResponseWriter, r *http.Request) (int, error) {
+	//
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&api.body)
+	if err != nil {
+		return http.StatusBadRequest, err
+	}
+
+	//
 	if len(api.body.Account) == 0 ||
 		len(api.body.Password) == 0 ||
 		len(api.body.Fullname) == 0 {
@@ -76,8 +62,9 @@ func (api *CreateUser) do() (int, error) {
 	if err := modules.CheckRegex(api.body.Account, api.body.Password, api.body.Fullname); err != nil {
 		return http.StatusBadRequest, err
 	}
+
 	//
-	err := api.model_create_user.SetAcct(api.body.Account).
+	err = api.model_create_user.SetAcct(api.body.Account).
 		SetFullname(api.body.Fullname).
 		SetPwd(modules.HashPasswrod(api.body.Password)).Create()
 	if err != nil {

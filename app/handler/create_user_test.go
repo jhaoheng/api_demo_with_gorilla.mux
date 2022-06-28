@@ -26,6 +26,7 @@ type SuiteCreateUserTestPlan struct {
 	Account  string
 	Password string
 	Fullname string
+	Expect   string
 }
 
 type SuiteCreateUser struct {
@@ -48,6 +49,7 @@ func (s *SuiteCreateUser) BeforeTest(suiteName, testName string) {
 			Account:  "max",
 			Password: "12345",
 			Fullname: "maxhu",
+			Expect:   `{"data":{"account":"max","fullname":"maxhu","created_at":"2022-01-01 12:00:00","updated_at":"2022-01-01 12:00:00"},"error":"0"}`,
 		},
 	}
 }
@@ -57,7 +59,11 @@ func (s *SuiteCreateUser) TestDo() {
 		fmt.Printf("\n=== %v ===\n", index)
 		//
 		req, err := http.NewRequest(s.ApiMethod, s.ApiUrl, func() io.Reader {
-			b, _ := json.Marshal(test_plan)
+			b, _ := json.Marshal(CreateUserBody{
+				Account:  test_plan.Account,
+				Password: test_plan.Password,
+				Fullname: test_plan.Fullname,
+			})
 			return bytes.NewBuffer(b)
 		}())
 		if !s.NoError(err) {
@@ -80,11 +86,14 @@ func (s *SuiteCreateUser) TestDo() {
 		}).ServeHTTP(rr, req)
 
 		//
-		fmt.Println("http status_code=>", rr.Code)
-		fmt.Println("header=>", rr.Header())
-		fmt.Println("body=>", rr.Body.String())
+		// fmt.Println("http status_code=>", rr.Code)
+		// fmt.Println("header=>", rr.Header())
+		// fmt.Println("body=>", rr.Body.String())
 		if rr.Code != http.StatusOK {
-			s.T().Error("Not OK")
+			s.T().Fatalf("handler returned wrong status code: got %v want %v", rr.Code, http.StatusOK)
+		}
+		if rr.Body.String() != test_plan.Expect {
+			s.T().Fatalf("handler returned unexpected body: \n- got %v \n- want %v", rr.Body.String(), test_plan.Expect)
 		}
 	}
 	fmt.Println("")
@@ -107,14 +116,16 @@ func (s *SuiteCreateUser) mock_create_user(acct, pass, fullname string) *models.
 }
 
 func (s *SuiteCreateUser) mock_get_user(acct, fullname string) *models.MockUser {
+	time_at, _ := time.Parse("2006-01-02 15:04:05", "2022-01-01 12:00:00")
+
 	mock_get_user := models.NewMockUser()
 	mock_get_user.On("SetAcct", acct)
 	mock_get_user.On("SetFullname", fullname)
 	mock_get_user.On("Get").Return(models.User{
 		Acct:      acct,
 		Fullname:  fullname,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		CreatedAt: time_at,
+		UpdatedAt: time_at,
 	}, nil)
 	return mock_get_user
 }

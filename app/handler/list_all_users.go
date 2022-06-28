@@ -41,6 +41,8 @@ func ListAllUsersHandler(w http.ResponseWriter, r *http.Request) {
 			Paging:  r.URL.Query().Get("paging"),
 			Sorting: r.URL.Query().Get("sorting"),
 		},
+		path:                 &ListAllUsersPath{},
+		body:                 &ListAllUsersBody{},
 		model_get_all_counts: models.NewUser(),
 		model_get_users:      models.NewUser(),
 	}

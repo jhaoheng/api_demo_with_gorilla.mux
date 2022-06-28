@@ -32,6 +32,8 @@ func GetUserDetailedHandler(w http.ResponseWriter, r *http.Request) {
 		r:              r,
 		access_account: context.Get(r, "account").(string),
 		model_get_user: models.NewUser(),
+		path:           &GetUserDetailedPath{},
+		body:           &GetUserDetailedBody{},
 	}
 	payload, status, err := api.do()
 	modules.NewResp(w, r).Set(modules.RespContect{

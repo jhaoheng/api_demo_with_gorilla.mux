@@ -31,6 +31,7 @@ func SearchUserByFullnameHandler(w http.ResponseWriter, r *http.Request) {
 		path: &SearchUserByFullnamePath{
 			Fullname: vars["fullname"],
 		},
+		body:           &SearchUserByFullnameBody{},
 		model_get_user: models.NewUser(),
 	}
 	resp, status, err := api.do()

@@ -38,6 +38,7 @@ func UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	api := UpdateUser{
+		path:           &UpdateUserPath{},
 		body:           &body,
 		access_account: context.Get(r, "account").(string),
 	}

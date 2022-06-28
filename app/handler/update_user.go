@@ -4,67 +4,82 @@ import (
 	"app/models"
 	"app/modules"
 	"encoding/json"
-	"errors"
 	"net/http"
 
 	"github.com/gorilla/context"
 )
 
-type UpdateUserObj struct {
+type UpdateUser struct {
+	path              *UpdateUserPath
+	body              *UpdateUserBody
+	access_account    string
+	model_update_user models.IUser
+	model_get_user    models.IUser
+}
+
+type UpdateUserPath struct{}
+type UpdateUserBody struct {
 	Password string `json:"password"`
 	Fullname string `json:"fullname"`
 }
+type UpdateUserResp struct {
+	Account   string `json:"account"`
+	Fullname  string `json:"fullname"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
+}
 
-func UpdateUser(w http.ResponseWriter, r *http.Request) {
-	obj := UpdateUserObj{}
-	//
+func UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
+	body := UpdateUserBody{}
 	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&obj)
-	if err != nil || (len(obj.Fullname) == 0 && len(obj.Password) == 0) {
-		err = errors.New("parameters error")
-		modules.NewResp(w, r).SetError(err, http.StatusBadRequest)
+	err := decoder.Decode(&body)
+	if err != nil {
+		modules.NewResp(w, r).Set(modules.RespContect{Error: err, Stutus: http.StatusBadRequest})
 		return
-	} else {
-		if len(obj.Fullname) != 0 {
-			if err := modules.CheckRegex(obj.Fullname); err != nil {
-				modules.NewResp(w, r).SetError(err, http.StatusBadRequest)
-				return
-			}
+	}
+	api := UpdateUser{
+		body:           &body,
+		access_account: context.Get(r, "account").(string),
+	}
+	resp, status, err := api.do()
+	modules.NewResp(w, r).Set(modules.RespContect{Data: resp, Error: err, Stutus: status})
+}
+
+func (api *UpdateUser) do() (*UpdateUserResp, int, error) {
+
+	if len(api.body.Fullname) != 0 {
+		if err := modules.CheckRegex(api.body.Fullname); err != nil {
+			return nil, http.StatusBadRequest, err
 		}
-		if len(obj.Password) != 0 {
-			if err := modules.CheckRegex(obj.Password); err != nil {
-				modules.NewResp(w, r).SetError(err, http.StatusBadRequest)
-				return
-			}
+	}
+	if len(api.body.Password) != 0 {
+		if err := modules.CheckRegex(api.body.Password); err != nil {
+			return nil, http.StatusBadRequest, err
 		}
 	}
 
 	//
-	account := context.Get(r, "account").(string)
-	user := models.NewUser()
-	user.SetAcct(account)
-	_, err = user.Update(models.User{
-		Pwd:      modules.HashPasswrod(obj.Password),
-		Fullname: obj.Fullname,
+	api.model_update_user.SetAcct(api.access_account)
+	_, err := api.model_update_user.Update(models.User{
+		Pwd:      modules.HashPasswrod(api.body.Password),
+		Fullname: api.body.Fullname,
 	})
 	if err != nil {
-		modules.NewResp(w, r).SetError(err, http.StatusBadRequest)
-		return
-	}
-	//
-	user = models.NewUser()
-	result, err := user.SetAcct(account).Get()
-	if err != nil {
-		modules.NewResp(w, r).SetError(err, http.StatusBadRequest)
-		return
+		return nil, http.StatusBadRequest, err
 	}
 
 	//
-	data := map[string]string{
-		"account":    result.Acct,
-		"fullname":   result.Fullname,
-		"create_at":  result.CreatedAt.String(),
-		"updated_at": result.UpdatedAt.String(),
+	result, err := api.model_get_user.SetAcct(api.access_account).Get()
+	if err != nil {
+		return nil, http.StatusBadRequest, err
 	}
-	modules.NewResp(w, r).SetSuccess(data)
+
+	//
+	payload := UpdateUserResp{
+		Account:   result.Acct,
+		Fullname:  result.Fullname,
+		CreatedAt: result.CreatedAt.String(),
+		UpdatedAt: result.UpdatedAt.String(),
+	}
+	return &payload, http.StatusOK, nil
 }

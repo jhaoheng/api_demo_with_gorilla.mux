@@ -17,7 +17,7 @@ func JWTValidate(next http.Handler) http.Handler {
 		tokenString := r.Header.Get("Authorization")
 		if len(tokenString) == 0 {
 			err := errors.New("forbidden, authorization fail")
-			modules.NewResp(w, r).SetError(err, http.StatusForbidden)
+			modules.NewResp(w, r).Set(modules.RespContect{Error: err, Stutus: http.StatusForbidden})
 			return
 		}
 
@@ -29,7 +29,7 @@ func JWTValidate(next http.Handler) http.Handler {
 			context.Set(r, "account", account) // use => account := context.Get(r, "account").(string)
 		} else {
 			err := errors.New("forbidden, authorization fail")
-			modules.NewResp(w, r).SetError(err, http.StatusForbidden)
+			modules.NewResp(w, r).Set(modules.RespContect{Error: err, Stutus: http.StatusForbidden})
 			return
 		}
 		//
@@ -38,7 +38,7 @@ func JWTValidate(next http.Handler) http.Handler {
 		_, err := user.Get()
 		if err != nil {
 			err = errors.New("forbidden, authorization fail")
-			modules.NewResp(w, r).SetError(err, http.StatusForbidden)
+			modules.NewResp(w, r).Set(modules.RespContect{Error: err, Stutus: http.StatusForbidden})
 			return
 		}
 		//

@@ -6,56 +6,78 @@ import (
 	"app/modules"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
 )
 
-type SigninObj struct {
+type Signin struct {
+	path           *SigninPath
+	body           *SigninBody
+	model_get_user models.IUser
+}
+
+type SigninPath struct{}
+type SigninBody struct {
 	Account  string `json:"account"`
 	Password string `json:"password"`
 }
+type SigninResp struct {
+	Token string `json:"token"`
+}
 
-func Signin(w http.ResponseWriter, r *http.Request) {
-	signinObj := SigninObj{}
+func SigninHandler(w http.ResponseWriter, r *http.Request) {
 	//
+	body := &SigninBody{}
 	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&signinObj)
-	if err != nil || len(signinObj.Account) == 0 || len(signinObj.Password) == 0 {
-		err = errors.New("parameters error")
-		modules.NewResp(w, r).SetError(err, http.StatusBadRequest)
-		signinFialNotify(err, r.RequestURI, signinObj.Account)
+	err := decoder.Decode(body)
+	if err != nil {
+		modules.NewResp(w, r).Set(modules.RespContect{Error: err, Stutus: http.StatusBadRequest})
+		signinFialNotify(err, r.RequestURI, body.Account)
 		return
-	} else {
-		if err := modules.CheckRegex(signinObj.Account, signinObj.Password); err != nil {
-			modules.NewResp(w, r).SetError(err, http.StatusBadRequest)
-			signinFialNotify(err, r.RequestURI, signinObj.Account)
-			return
-		}
+	}
+
+	api := Signin{
+		path:           &SigninPath{},
+		body:           body,
+		model_get_user: models.NewUser(),
+	}
+	resp, status, err := api.do()
+	if err != nil {
+		signinFialNotify(err, r.RequestURI, api.body.Account)
+	}
+	modules.NewResp(w, r).Set(modules.RespContect{Data: resp, Stutus: status, Error: err})
+}
+
+func (api *Signin) do() (*SigninResp, int, error) {
+	if len(api.body.Account) == 0 || len(api.body.Password) == 0 {
+		err := fmt.Errorf("parameters lost")
+		return nil, http.StatusUnprocessableEntity, err
 	}
 
 	//
-	user := models.NewUser()
-	result, err := user.SetAcct(signinObj.Account).Get()
-	if err != nil {
-		modules.NewResp(w, r).SetError(err, http.StatusBadRequest)
-		signinFialNotify(err, r.RequestURI, signinObj.Account)
-		return
+	if err := modules.CheckRegex(api.body.Account, api.body.Password); err != nil {
+		return nil, http.StatusBadRequest, err
 	}
+
 	//
-	hashPwd := modules.HashPasswrod(signinObj.Password)
+	result, err := api.model_get_user.SetAcct(api.body.Account).Get()
+	if err != nil {
+		return nil, http.StatusBadRequest, err
+	}
+
+	//
+	hashPwd := modules.HashPasswrod(api.body.Password)
 	if !strings.EqualFold(hashPwd, result.Pwd) {
 		err := errors.New("password error")
-		modules.NewResp(w, r).SetError(err, http.StatusBadRequest)
-		signinFialNotify(err, r.RequestURI, signinObj.Account)
-		return
+		return nil, http.StatusBadRequest, err
 	}
-
 	//
-	respContent := map[string]string{
-		"token": modules.NewJWTSrv(config.CFG.JWT_PUBLIC_KEY_PATH, config.CFG.JWT_PRIVATE_KEY_PATH).Encrtpying(signinObj.Account),
+	resp := SigninResp{
+		Token: modules.NewJWTSrv(config.CFG.JWT_PUBLIC_KEY_PATH, config.CFG.JWT_PRIVATE_KEY_PATH).Encrtpying(api.body.Account),
 	}
-	modules.NewResp(w, r).SetSuccess(respContent)
+	return &resp, http.StatusOK, nil
 }
 
 func signinFialNotify(err error, from, account string) {

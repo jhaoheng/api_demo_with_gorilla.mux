@@ -9,77 +9,105 @@ import (
 	"strings"
 )
 
-type ListAllUsersObj struct {
+type ListAllUsers struct {
+	query                *ListAllUsersQuery
+	path                 *ListAllUsersPath
+	body                 *ListAllUsersBody
+	model_get_all_counts models.IUser
+	model_get_users      models.IUser
+}
+
+type ListAllUsersQuery struct {
 	Paging  string
 	Sorting string
 }
+type ListAllUsersPath struct{}
+type ListAllUsersBody struct{}
+type ListAllUsersResp struct {
+	Total int                    `json:"total"`
+	Users []ListAllUsersRespUser `json:"users"`
+}
 
-func ListAllUsers(w http.ResponseWriter, r *http.Request) {
-	listAllUsersObj := ListAllUsersObj{}
-	//
-	var err error
-	listAllUsersObj.Paging = r.URL.Query().Get("paging")
-	listAllUsersObj.Sorting = r.URL.Query().Get("sorting")
-	if err = listAllUsersObj.check_paging(); err != nil {
-		modules.NewResp(w, r).SetError(err, http.StatusBadRequest)
-		return
+type ListAllUsersRespUser struct {
+	Account   string `json:"account"`
+	Fullname  string `json:"fullname"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
+}
+
+func ListAllUsersHandler(w http.ResponseWriter, r *http.Request) {
+	api := ListAllUsers{
+		query: &ListAllUsersQuery{
+			Paging:  r.URL.Query().Get("paging"),
+			Sorting: r.URL.Query().Get("sorting"),
+		},
+		model_get_all_counts: models.NewUser(),
+		model_get_users:      models.NewUser(),
 	}
-	if err = listAllUsersObj.check_sorting(); err != nil {
-		modules.NewResp(w, r).SetError(err, http.StatusBadRequest)
-		return
+	resp, status, err := api.do()
+	modules.NewResp(w, r).Set(modules.RespContect{Data: resp, Error: err, Stutus: status})
+}
+
+func (api *ListAllUsers) do() (*ListAllUsersResp, int, error) {
+
+	if err := api.check_paging(); err != nil {
+		return nil, http.StatusBadRequest, err
+	}
+	//
+	if err := api.check_sorting(); err != nil {
+		return nil, http.StatusBadRequest, err
 	}
 
 	//
-	user := models.NewUser()
-	total, err := user.GetAllCount()
+	total, err := api.model_get_all_counts.GetAllCount()
 	if err != nil {
-		modules.NewResp(w, r).SetError(err, http.StatusBadRequest)
-		return
-	}
-	results, err := user.ListBy(listAllUsersObj.Paging, listAllUsersObj.Sorting, 10)
-	if err != nil {
-		modules.NewResp(w, r).SetError(err, http.StatusBadRequest)
-		return
+		return nil, http.StatusBadRequest, err
 	}
 
 	//
-	datas := make([]map[string]string, 0)
+	results, err := api.model_get_users.ListBy(api.query.Paging, api.query.Sorting, 10)
+	if err != nil {
+		return nil, http.StatusBadRequest, err
+	}
+
+	//
+	datas := []ListAllUsersRespUser{}
 	for _, user := range results {
-		data := map[string]string{
-			"account":    user.Acct,
-			"fullname":   user.Fullname,
-			"create_at":  user.CreatedAt.String(),
-			"updated_at": user.UpdatedAt.String(),
+		data := ListAllUsersRespUser{
+			Account:   user.Acct,
+			Fullname:  user.Fullname,
+			CreatedAt: user.CreatedAt.String(),
+			UpdatedAt: user.UpdatedAt.String(),
 		}
 		datas = append(datas, data)
 	}
-	respContent := map[string]interface{}{
-		"total": total,
-		"users": datas,
-	}
 
-	modules.NewResp(w, r).SetSuccess(respContent)
+	resp := &ListAllUsersResp{
+		Total: int(total),
+		Users: datas,
+	}
+	return resp, http.StatusOK, nil
 }
 
-func (l *ListAllUsersObj) check_paging() error {
-	if len(l.Paging) == 0 || strings.EqualFold(l.Paging, "0") {
-		l.Paging = "1"
+func (api *ListAllUsers) check_paging() error {
+	if len(api.query.Paging) == 0 || strings.EqualFold(api.query.Paging, "0") {
+		api.query.Paging = "1"
 		return nil
 	}
 	var re = regexp.MustCompile(`[0-9]$`)
-	if !re.MatchString(l.Paging) {
+	if !re.MatchString(api.query.Paging) {
 		return errors.New("paging must be number")
 	}
 	return nil
 }
 
-func (l *ListAllUsersObj) check_sorting() error {
-	if len(l.Sorting) == 0 {
-		l.Sorting = "asc"
+func (api *ListAllUsers) check_sorting() error {
+	if len(api.query.Sorting) == 0 {
+		api.query.Sorting = "asc"
 	}
 
 	var re = regexp.MustCompile(`^(asc|desc)$`)
-	if !re.MatchString(l.Sorting) {
+	if !re.MatchString(api.query.Sorting) {
 		return errors.New(`sorting must be 'asc' or 'desc'`)
 	}
 	return nil

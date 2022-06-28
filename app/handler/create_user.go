@@ -4,48 +4,87 @@ import (
 	"app/models"
 	"app/modules"
 	"encoding/json"
-	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 )
 
-type CreateUserObj struct {
+type CreateUser struct {
+	w                 http.ResponseWriter
+	r                 *http.Request
+	path              *CreateUserPath
+	body              *CreateUserBody
+	model_create_user models.IUser
+}
+
+type CreateUserPath struct {
+}
+
+type CreateUserBody struct {
 	Account  string `json:"account"`
 	Password string `json:"password"`
 	Fullname string `json:"fullname"`
 }
 
-func CreateUser(w http.ResponseWriter, r *http.Request) {
-	createUserObj := CreateUserObj{}
+type CreateUserResult struct {
+}
+
+func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
+	body := &CreateUserBody{}
 	//
 	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&createUserObj)
-	if err != nil ||
-		len(createUserObj.Account) == 0 ||
-		len(createUserObj.Password) == 0 ||
-		len(createUserObj.Fullname) == 0 {
-		err = errors.New("parameters error")
-		modules.NewResp(w, r).SetError(err, http.StatusBadRequest)
+	err := decoder.Decode(body)
+	if err != nil {
+		modules.NewResp(w, r).Set(modules.RespContect{Error: err, Stutus: http.StatusBadRequest})
 		return
-	} else {
-		if err := modules.CheckRegex(createUserObj.Account, createUserObj.Password, createUserObj.Fullname); err != nil {
-			modules.NewResp(w, r).SetError(err, http.StatusBadRequest)
-			return
-		}
 	}
 
 	//
-	user := models.NewUser()
-	if err = user.SetAcct(createUserObj.Account).
-		SetFullname(createUserObj.Fullname).
-		SetPwd(modules.HashPasswrod(createUserObj.Password)).Create(); err != nil {
-		if strings.Contains(err.Error(), "duplicate key") {
-			modules.NewResp(w, r).SetError(err, http.StatusBadRequest)
-		} else {
-			modules.NewResp(w, r).SetError(err, http.StatusBadGateway)
-		}
+	api := CreateUser{
+		w:                 w,
+		r:                 r,
+		path:              &CreateUserPath{},
+		body:              body,
+		model_create_user: models.NewUser(),
+	}
+	status, err := api.do()
+	if err != nil {
+		modules.NewResp(w, r).Set(modules.RespContect{
+			Error:  err,
+			Stutus: status,
+		})
 		return
 	}
 
-	modules.NewResp(w, r).SetSuccess("success")
+	//
+	payload := CreateUserResult{}
+	modules.NewResp(w, r).Set(modules.RespContect{
+		Data:   payload,
+		Stutus: http.StatusOK,
+	})
+}
+
+func (api *CreateUser) do() (int, error) {
+	if len(api.body.Account) == 0 ||
+		len(api.body.Password) == 0 ||
+		len(api.body.Fullname) == 0 {
+		err := fmt.Errorf("parameters lost")
+		return http.StatusUnprocessableEntity, err
+	}
+
+	//
+	if err := modules.CheckRegex(api.body.Account, api.body.Password, api.body.Fullname); err != nil {
+		return http.StatusBadRequest, err
+	}
+	//
+	err := api.model_create_user.SetAcct(api.body.Account).
+		SetFullname(api.body.Fullname).
+		SetPwd(modules.HashPasswrod(api.body.Password)).Create()
+	if err != nil {
+		if strings.Contains(err.Error(), "duplicate key") {
+			return http.StatusBadRequest, err
+		}
+		return http.StatusBadGateway, err
+	}
+	return 200, nil
 }

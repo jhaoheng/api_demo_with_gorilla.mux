@@ -8,27 +8,49 @@ import (
 	"github.com/gorilla/context"
 )
 
-type GetUserDetailedInfoObj struct {
-	Account string
+type GetUserDetailed struct {
+	w              http.ResponseWriter
+	r              *http.Request
+	path           *GetUserDetailedPath
+	body           *GetUserDetailedBody
+	access_account string
+	model_get_user models.IUser
 }
 
-func GetUserDetailedInfo(w http.ResponseWriter, r *http.Request) {
-	getUserDetailedInfoObj := GetUserDetailedInfoObj{}
-	getUserDetailedInfoObj.Account = context.Get(r, "account").(string)
+type GetUserDetailedPath struct{}
+type GetUserDetailedBody struct{}
+type GetUserDetailedResp struct {
+	Account   string `json:"account"`
+	Fullname  string `json:"fullname"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
+}
 
-	//
-	user := models.NewUser()
-	result, err := user.SetAcct(getUserDetailedInfoObj.Account).Get()
+func GetUserDetailedHandler(w http.ResponseWriter, r *http.Request) {
+	api := GetUserDetailed{
+		w:              w,
+		r:              r,
+		access_account: context.Get(r, "account").(string),
+		model_get_user: models.NewUser(),
+	}
+	payload, status, err := api.do()
+	modules.NewResp(w, r).Set(modules.RespContect{
+		Data:   payload,
+		Error:  err,
+		Stutus: status,
+	})
+}
+
+func (api *GetUserDetailed) do() (*GetUserDetailedResp, int, error) {
+	result, err := api.model_get_user.SetAcct(api.access_account).Get()
 	if err != nil {
-		modules.NewResp(w, r).SetError(err, http.StatusBadRequest)
-		return
+		return nil, http.StatusBadRequest, err
 	}
-
-	data := map[string]string{
-		"account":    result.Acct,
-		"fullname":   result.Fullname,
-		"create_at":  result.CreatedAt.String(),
-		"updated_at": result.UpdatedAt.String(),
+	resp := GetUserDetailedResp{
+		Account:   result.Acct,
+		Fullname:  result.Fullname,
+		CreatedAt: result.CreatedAt.String(),
+		UpdatedAt: result.UpdatedAt.String(),
 	}
-	modules.NewResp(w, r).SetSuccess(data)
+	return &resp, http.StatusOK, nil
 }

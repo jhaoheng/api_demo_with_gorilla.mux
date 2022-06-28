@@ -11,35 +11,35 @@ func RegisterRoutes(r *mux.Router) {
 	r.Use(middlewares.ShowRequest)
 	//
 	getCSRFTokenRouter := r.PathPrefix("/csrf").Subrouter()
-	getCSRFTokenRouter.HandleFunc("", handler.GetCSRFToken).Methods("GET")
+	getCSRFTokenRouter.HandleFunc("", handler.GetCSRFTokenHandler).Methods("GET")
 
 	//
 	signupRouter := r.PathPrefix("/signup").Subrouter()
-	signupRouter.HandleFunc("", handler.CreateUser).Methods("POST")
+	signupRouter.HandleFunc("", handler.CreateUserHandler).Methods("POST")
 
 	//
 	signinRouter := r.PathPrefix("/signin").Subrouter()
-	signinRouter.HandleFunc("", handler.Signin).Methods("POST")
+	signinRouter.HandleFunc("", handler.SigninHandler).Methods("POST")
 
 	//
 	usersRouter := r.PathPrefix("/users").Subrouter()
 	usersRouter.Use(middlewares.JWTValidate)
-	usersRouter.HandleFunc("", handler.ListAllUsers).Methods("GET")
+	usersRouter.HandleFunc("", handler.ListAllUsersHandler).Methods("GET")
 
 	//
 	userRouter := r.PathPrefix("/user").Subrouter()
 	userRouter.Use(middlewares.JWTValidate)
 	{
 		// get user by fullname
-		userRouter.HandleFunc("/fullname/{fullname}", handler.SearchUserByFullname).Methods("GET")
+		userRouter.HandleFunc("/fullname/{fullname}", handler.SearchUserByFullnameHandler).Methods("GET")
 		// get me
-		userRouter.HandleFunc("/me", handler.GetUserDetailedInfo).Methods("GET")
+		userRouter.HandleFunc("/me", handler.GetUserDetailedHandler).Methods("GET")
 		// delete user by account
-		userRouter.HandleFunc("/account/{account}", handler.DeleteUser).Methods("DELETE")
+		userRouter.HandleFunc("/account/{account}", handler.DeleteUserHandler).Methods("DELETE")
 		// update me
-		userRouter.HandleFunc("/me", handler.UpdateUser).Methods("PATCH")
+		userRouter.HandleFunc("/me", handler.UpdateUserHandler).Methods("PATCH")
 		// update specific user fullname
-		userRouter.HandleFunc("/account/{account}", handler.UpdateSpecificUserFullname).Methods("PATCH")
+		userRouter.HandleFunc("/account/{account}", handler.UpdateUserFullnameHandler).Methods("PATCH")
 	}
 
 	// websocket

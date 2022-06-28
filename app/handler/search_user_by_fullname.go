@@ -8,35 +8,52 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type SearchUserByFullnameObj struct {
-	Fullname string
+type SearchUserByFullname struct {
+	path           *SearchUserByFullnamePath
+	body           *SearchUserByFullnameBody
+	model_get_user models.IUser
 }
 
-func SearchUserByFullname(w http.ResponseWriter, r *http.Request) {
-	searchUserByFullnameObj := SearchUserByFullnameObj{}
-	//
+type SearchUserByFullnamePath struct {
+	Fullname string
+}
+type SearchUserByFullnameBody struct{}
+type SearchUserByFullnameResp struct {
+	Account   string `json:"account"`
+	Fullname  string `json:"fullname"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
+}
+
+func SearchUserByFullnameHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	searchUserByFullnameObj.Fullname = vars["fullname"]
+	api := SearchUserByFullname{
+		path: &SearchUserByFullnamePath{
+			Fullname: vars["fullname"],
+		},
+		model_get_user: models.NewUser(),
+	}
+	resp, status, err := api.do()
+	modules.NewResp(w, r).Set(modules.RespContect{Data: resp, Error: err, Stutus: status})
+}
 
-	//
-	if err := modules.CheckRegex(searchUserByFullnameObj.Fullname); err != nil {
-		modules.NewResp(w, r).SetError(err, http.StatusBadRequest)
-		return
+func (api *SearchUserByFullname) do() (*SearchUserByFullnameResp, int, error) {
+
+	if err := modules.CheckRegex(api.path.Fullname); err != nil {
+		return nil, http.StatusBadRequest, err
 	}
 
-	//
-	user := models.NewUser()
-	result, err := user.SetFullname(searchUserByFullnameObj.Fullname).Get()
+	result, err := api.model_get_user.SetFullname(api.path.Fullname).Get()
 	if err != nil {
-		modules.NewResp(w, r).SetError(err, http.StatusBadRequest)
-		return
+		return nil, http.StatusBadRequest, err
 	}
 
-	data := map[string]string{
-		"account":    result.Acct,
-		"fullname":   result.Fullname,
-		"create_at":  result.CreatedAt.String(),
-		"updated_at": result.UpdatedAt.String(),
+	//
+	payload := SearchUserByFullnameResp{
+		Account:   result.Acct,
+		Fullname:  result.Fullname,
+		CreatedAt: result.CreatedAt.String(),
+		UpdatedAt: result.UpdatedAt.String(),
 	}
-	modules.NewResp(w, r).SetSuccess(data)
+	return &payload, http.StatusOK, nil
 }

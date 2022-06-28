@@ -5,6 +5,8 @@ import (
 	"net/http"
 )
 
-func GetCSRFToken(w http.ResponseWriter, r *http.Request) {
-	modules.NewResp(w, r).SetSuccess("success")
+func GetCSRFTokenHandler(w http.ResponseWriter, r *http.Request) {
+	modules.NewResp(w, r).Set(modules.RespContect{
+		Stutus: http.StatusOK,
+	})
 }

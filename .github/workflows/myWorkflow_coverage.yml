@@ -1,0 +1,36 @@
+name: coverage
+
+on: 
+  push:
+    branches:
+      - master
+    paths:
+      - '.github/workflows/myWorkflow_coverage.yml'
+
+jobs:
+  my-job-coverage:
+    name: coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '>=1.16'
+
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Produce Coverage report
+        run: |
+          cd keypair
+          ssh-keygen -t rsa -b 4096 -m PEM -f jwt_rs256.key 
+          openssl rsa -in jwt_rs256.key -pubout -outform PEM -out jwt_rs256.key.pub 
+          cd -
+          go test ./app/handler/ -coverprofile=coverage.out
+          ls -al
+
+      - name: Upload Coverage report to CodeCov
+        uses: codecov/codecov-action@v2
+        with:
+          token: ${{secrets.CODECOV_TOKEN}}
+          files: ./coverage.out

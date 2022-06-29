@@ -1,4 +1,4 @@
-module app
+module github.com/jhaoheng/api_demo_with_gorilla.mux/app
 
 go 1.16
 

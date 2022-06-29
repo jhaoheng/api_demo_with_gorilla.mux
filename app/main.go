@@ -3,6 +3,7 @@ package main
 import (
 	"app/config"
 	"app/models"
+	"app/modules"
 	"app/route"
 	"context"
 	"crypto/rand"
@@ -38,6 +39,8 @@ func init() {
 		DBName:  c.DB_NAME,
 		IsDebug: true,
 	})
+	//
+	modules.InitValidate()
 }
 
 func main() {

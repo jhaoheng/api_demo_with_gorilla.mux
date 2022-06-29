@@ -9,8 +9,6 @@ import (
 )
 
 type GetUserDetailed struct {
-	w              http.ResponseWriter
-	r              *http.Request
 	path           *GetUserDetailedPath
 	body           *GetUserDetailedBody
 	access_account string
@@ -28,14 +26,12 @@ type GetUserDetailedResp struct {
 
 func GetUserDetailedHandler(w http.ResponseWriter, r *http.Request) {
 	api := GetUserDetailed{
-		w:              w,
-		r:              r,
 		access_account: context.Get(r, "account").(string),
 		model_get_user: models.NewUser(),
 		path:           &GetUserDetailedPath{},
 		body:           &GetUserDetailedBody{},
 	}
-	payload, status, err := api.do()
+	payload, status, err := api.do(w, r)
 	modules.NewResp(w, r).Set(modules.RespContect{
 		Data:   payload,
 		Error:  err,
@@ -43,7 +39,7 @@ func GetUserDetailedHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (api *GetUserDetailed) do() (*GetUserDetailedResp, int, error) {
+func (api *GetUserDetailed) do(w http.ResponseWriter, r *http.Request) (*GetUserDetailedResp, int, error) {
 	result, err := api.model_get_user.SetAcct(api.access_account).Get()
 	if err != nil {
 		return nil, http.StatusBadRequest, err
@@ -51,8 +47,8 @@ func (api *GetUserDetailed) do() (*GetUserDetailedResp, int, error) {
 	resp := GetUserDetailedResp{
 		Account:   result.Acct,
 		Fullname:  result.Fullname,
-		CreatedAt: result.CreatedAt.String(),
-		UpdatedAt: result.UpdatedAt.String(),
+		CreatedAt: result.CreatedAt.Format("2006-01-02 15:04:05"),
+		UpdatedAt: result.UpdatedAt.Format("2006-01-02 15:04:05"),
 	}
 	return &resp, http.StatusOK, nil
 }

@@ -34,11 +34,11 @@ func SearchUserByFullnameHandler(w http.ResponseWriter, r *http.Request) {
 		body:           &SearchUserByFullnameBody{},
 		model_get_user: models.NewUser(),
 	}
-	resp, status, err := api.do()
+	resp, status, err := api.do(w, r)
 	modules.NewResp(w, r).Set(modules.RespContect{Data: resp, Error: err, Stutus: status})
 }
 
-func (api *SearchUserByFullname) do() (*SearchUserByFullnameResp, int, error) {
+func (api *SearchUserByFullname) do(w http.ResponseWriter, r *http.Request) (*SearchUserByFullnameResp, int, error) {
 	result, err := api.model_get_user.SetFullname(api.path.Fullname).Get()
 	if err != nil {
 		return nil, http.StatusBadRequest, err
@@ -48,8 +48,8 @@ func (api *SearchUserByFullname) do() (*SearchUserByFullnameResp, int, error) {
 	payload := SearchUserByFullnameResp{
 		Account:   result.Acct,
 		Fullname:  result.Fullname,
-		CreatedAt: result.CreatedAt.String(),
-		UpdatedAt: result.UpdatedAt.String(),
+		CreatedAt: result.CreatedAt.Format("2006-01-02 15:04:05"),
+		UpdatedAt: result.UpdatedAt.Format("2006-01-02 15:04:05"),
 	}
 	return &payload, http.StatusOK, nil
 }

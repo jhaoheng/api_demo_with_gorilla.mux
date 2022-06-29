@@ -21,6 +21,11 @@
 - Docker version 20.10.6, build 370c289
 - docker-compose version 1.29.1, build c34c88b2
 
+# Run API Unit Test
+1. `cd app`
+2. `go test ./handler/ -v -cover`
+3. `go test ./handler/ -coverprofile=cover.out && go tool cover -html=cover.out`
+
 # 本地執行 API Service
 1. 產生 RS256 keypair for JWT
     1. `cd keypair`
@@ -32,10 +37,6 @@
 # websocket
 1. 執行本地 API service
 2. Run the client, `cd websocket_client && go run main.go`
-
-# Run API Unit Test
-1. 執行本地 API service
-2. `docker exec app go test ./...`
 
 # Postman/Newman, 執行自動測試
 1. 執行本地 API service

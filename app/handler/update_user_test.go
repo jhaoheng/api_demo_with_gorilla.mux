@@ -4,7 +4,6 @@ import (
 	"app/models"
 	"app/modules"
 	"bytes"
-	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -12,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gorilla/mux"
+	"github.com/gorilla/context"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/suite"
 )
@@ -76,18 +75,15 @@ func (s *SuiteUpdateUser) TestDo() {
 		if !s.NoError(err) {
 			s.T().Fatal(err)
 		}
-		ctx := context.WithValue(req.Context(), "account", test_plan.AccessAccount)
-		req = req.WithContext(ctx)
+		context.Set(req, "account", test_plan.AccessAccount)
 		rr := httptest.NewRecorder()
-		router := mux.NewRouter()
-		router.HandleFunc("/me", NewUpdateUser(func() *UpdateUser {
+		http.HandlerFunc(NewUpdateUser(func() *UpdateUser {
 			mock_api := UpdateUser{
 				model_update_user: s.mock_update_user(index, test_plan.AccessAccount, test_plan.ApiBody.Password, test_plan.ApiBody.Fullname),
 				model_get_user:    s.mock_get_user(index, test_plan.AccessAccount, test_plan.ApiBody.Fullname),
 			}
 			return &mock_api
-		}()))
-		router.ServeHTTP(rr, req)
+		}())).ServeHTTP(rr, req)
 
 		//
 		// fmt.Println("http status_code=>", rr.Code)

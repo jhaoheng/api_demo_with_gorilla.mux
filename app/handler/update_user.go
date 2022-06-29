@@ -5,6 +5,8 @@ import (
 	"app/modules"
 	"encoding/json"
 	"net/http"
+
+	"github.com/gorilla/context"
 )
 
 type UpdateUser struct {
@@ -36,10 +38,10 @@ func NewUpdateUser(mock_api *UpdateUser) func(w http.ResponseWriter, r *http.Req
 		api = *mock_api
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		// fmt.Println("=====>", r.Context().Value("account").(string))
+		// fmt.Println("=====>", r.Context().Value("account"))
 		// fmt.Println("====>", context.Get(r, "account"))
 		api.body = &UpdateUserBody{}
-		api.access_account = r.Context().Value("account").(string)
+		api.access_account = context.Get(r, "account").(string)
 		resp, status, err := api.do(w, r)
 		modules.NewResp(w, r).Set(modules.RespContect{Data: resp, Error: err, Stutus: status})
 	}

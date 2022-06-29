@@ -1,8 +1,9 @@
 {
 	"info": {
 		"_postman_id": "d4aee6a6-7e81-4662-8694-ca7d4d7056d7",
-		"name": "DemoApiWithGorillaMux",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"name": "api_demo_with_gorilla_mux",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "355503"
 	},
 	"item": [
 		{
@@ -12,7 +13,19 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.environment.set(\"X-CSRF-Token\", postman.getResponseHeader(\"X-Csrf-Token\"))"
+							"pm.environment.set(\"X-CSRF-Token\", postman.getResponseHeader(\"X-Csrf-Token\"))",
+							"console.log(\"csrf-token => \",pm.environment.get(\"X-CSRF-Token\"))",
+							"const cookies = pm.response.headers.all().filter(headerObj => headerObj.key === 'Set-Cookie').map(headerObj => headerObj.value);",
+							"pm.environment.set('cookies', cookies.join(';'));",
+							"",
+							"//",
+							"pm.test(pm.info.requestName + ': expect response be 200', function () {",
+							"    pm.expect(pm.response.code).to.eql(200);",
+							"})",
+							"if (pm.response.code != 200) {",
+							"    console.log(pm.response.json())",
+							"}",
+							""
 						],
 						"type": "text/javascript"
 					}
@@ -41,6 +54,28 @@
 					"script": {
 						"exec": [
 							"",
+							"",
+							"//",
+							"pm.test(pm.info.requestName + ': expect response be 200', function () {",
+							"    pm.expect(pm.response.code).to.eql(200);",
+							"})",
+							"if (pm.response.code != 200) {",
+							"    console.log(pm.response.json())",
+							"}",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"console.log(\"csrf-token => \",pm.environment.get(\"X-CSRF-Token\"))",
+							"",
+							"if (pm.environment.USE_COOKIE_JAR === true){",
+							"   requestLib = requestLib.defaults({jar: true});",
+							"}",
 							""
 						],
 						"type": "text/javascript"
@@ -53,6 +88,11 @@
 					{
 						"key": "X-CSRF-Token",
 						"value": "{{X-CSRF-Token}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{cookies}}",
 						"type": "text"
 					}
 				],
@@ -89,6 +129,14 @@
 							"",
 							"pm.environment.set(\"authorization\", jsonData.data.token);",
 							"",
+							"//",
+							"pm.test(pm.info.requestName + ': expect response be 200', function () {",
+							"    pm.expect(pm.response.code).to.eql(200);",
+							"})",
+							"if (pm.response.code != 200) {",
+							"    console.log(pm.response.json())",
+							"}",
+							"",
 							""
 						],
 						"type": "text/javascript"
@@ -101,6 +149,11 @@
 					{
 						"key": "X-CSRF-Token",
 						"value": "{{X-CSRF-Token}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{cookies}}",
 						"type": "text"
 					}
 				],
@@ -127,6 +180,25 @@
 		},
 		{
 			"name": "list all users",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"",
+							"",
+							"//",
+							"pm.test(pm.info.requestName + ': expect response be 200', function () {",
+							"    pm.expect(pm.response.code).to.eql(200);",
+							"})",
+							"if (pm.response.code != 200) {",
+							"    console.log(pm.response.json())",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
 				"auth": {
 					"type": "noauth"
@@ -136,6 +208,11 @@
 					{
 						"key": "Authorization",
 						"value": "{{authorization}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{cookies}}",
 						"type": "text"
 					}
 				],
@@ -172,6 +249,23 @@
 						],
 						"type": "text/javascript"
 					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"",
+							"",
+							"//",
+							"pm.test(pm.info.requestName + ': expect response be 200', function () {",
+							"    pm.expect(pm.response.code).to.eql(200);",
+							"})",
+							"if (pm.response.code != 200) {",
+							"    console.log(pm.response.json())",
+							"}"
+						],
+						"type": "text/javascript"
+					}
 				}
 			],
 			"request": {
@@ -180,6 +274,11 @@
 					{
 						"key": "Authorization",
 						"value": "{{authorization}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{cookies}}",
 						"type": "text"
 					}
 				],
@@ -199,12 +298,36 @@
 		},
 		{
 			"name": "get user detail info",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"",
+							"",
+							"//",
+							"pm.test(pm.info.requestName + ': expect response be 200', function () {",
+							"    pm.expect(pm.response.code).to.eql(200);",
+							"})",
+							"if (pm.response.code != 200) {",
+							"    console.log(pm.response.json())",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
 				"method": "GET",
 				"header": [
 					{
 						"key": "Authorization",
 						"value": "{{authorization}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{cookies}}",
 						"type": "text"
 					}
 				],
@@ -222,48 +345,26 @@
 			"response": []
 		},
 		{
-			"name": "delete account",
+			"name": "update me",
 			"event": [
 				{
-					"listen": "prerequest",
+					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.environment.set(\"del_account\", \"max2\");"
+							"",
+							"",
+							"//",
+							"pm.test(pm.info.requestName + ': expect response be 200', function () {",
+							"    pm.expect(pm.response.code).to.eql(200);",
+							"})",
+							"if (pm.response.code != 200) {",
+							"    console.log(pm.response.json())",
+							"}"
 						],
 						"type": "text/javascript"
 					}
 				}
 			],
-			"request": {
-				"method": "DELETE",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "{{authorization}}",
-						"type": "text"
-					},
-					{
-						"key": "X-CSRF-Token",
-						"value": "{{X-CSRF-Token}}",
-						"type": "text"
-					}
-				],
-				"url": {
-					"raw": "{{host}}/user/account/{{del_account}}",
-					"host": [
-						"{{host}}"
-					],
-					"path": [
-						"user",
-						"account",
-						"{{del_account}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "update me",
 			"request": {
 				"method": "PATCH",
 				"header": [
@@ -275,6 +376,11 @@
 					{
 						"key": "X-CSRF-Token",
 						"value": "{{X-CSRF-Token}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{cookies}}",
 						"type": "text"
 					}
 				],
@@ -311,6 +417,23 @@
 						],
 						"type": "text/javascript"
 					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"",
+							"",
+							"//",
+							"pm.test(pm.info.requestName + ': expect response be 200', function () {",
+							"    pm.expect(pm.response.code).to.eql(200);",
+							"})",
+							"if (pm.response.code != 200) {",
+							"    console.log(pm.response.json())",
+							"}"
+						],
+						"type": "text/javascript"
+					}
 				}
 			],
 			"request": {
@@ -324,6 +447,11 @@
 					{
 						"key": "X-CSRF-Token",
 						"value": "{{X-CSRF-Token}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{cookies}}",
 						"type": "text"
 					}
 				],
@@ -345,6 +473,69 @@
 						"user",
 						"account",
 						"{{update_account}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete account",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.environment.set(\"del_account\", \"max\");"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"",
+							"",
+							"//",
+							"pm.test(pm.info.requestName + ': expect response be 200', function () {",
+							"    pm.expect(pm.response.code).to.eql(200);",
+							"})",
+							"if (pm.response.code != 200) {",
+							"    console.log(pm.response.json())",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization}}",
+						"type": "text"
+					},
+					{
+						"key": "X-CSRF-Token",
+						"value": "{{X-CSRF-Token}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{cookies}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{host}}/user/account/{{del_account}}",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"user",
+						"account",
+						"{{del_account}}"
 					]
 				}
 			},

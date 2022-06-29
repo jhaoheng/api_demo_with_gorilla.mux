@@ -3,3 +3,4 @@ keypair/*
 cover.out
 app/models/*_test.go
 !app/models/database_test.go
+newman

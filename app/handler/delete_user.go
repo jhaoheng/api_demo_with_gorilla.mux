@@ -3,9 +3,7 @@ package handler
 import (
 	"app/models"
 	"app/modules"
-	"errors"
 	"net/http"
-	"strings"
 
 	"github.com/gorilla/context"
 
@@ -55,17 +53,8 @@ func (api *DeleteUser) do(w http.ResponseWriter, r *http.Request) (*DeleteUserRe
 	}
 
 	//
-	if strings.EqualFold(api.access_account, api.path.DelAccount) {
-		err := errors.New("you can't delte yourself")
-		return nil, http.StatusBadRequest, err
-	}
-
-	//
 	api.model_del_account.SetAcct(api.path.DelAccount)
-	if rowsAffected, err := api.model_del_account.Delete(); err != nil {
-		return nil, http.StatusBadRequest, err
-	} else if rowsAffected == 0 {
-		err = errors.New("delete account not exist")
+	if _, err := api.model_del_account.Delete(); err != nil {
 		return nil, http.StatusBadRequest, err
 	}
 	return &DeleteUserResp{}, http.StatusOK, nil

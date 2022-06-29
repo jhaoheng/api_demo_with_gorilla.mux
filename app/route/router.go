@@ -11,7 +11,7 @@ func RegisterRoutes(r *mux.Router) {
 	r.Use(middlewares.ShowRequest)
 	//
 	getCSRFTokenRouter := r.PathPrefix("/csrf").Subrouter()
-	getCSRFTokenRouter.HandleFunc("", handler.GetCSRFTokenHandler).Methods("GET")
+	getCSRFTokenRouter.HandleFunc("", handler.NewGetCSRFToken(nil)).Methods("GET")
 
 	//
 	signupRouter := r.PathPrefix("/signup").Subrouter()

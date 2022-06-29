@@ -1,12 +1,13 @@
 package handler
 
 import (
-	"app/models"
-	"app/modules"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"api_demo_with_gorilla.mux/app/models"
+	"api_demo_with_gorilla.mux/app/modules"
 
 	"github.com/gorilla/context"
 	"github.com/sirupsen/logrus"

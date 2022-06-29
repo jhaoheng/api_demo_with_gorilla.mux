@@ -1,12 +1,13 @@
 package handler
 
 import (
-	"app/models"
-	"app/modules"
 	"errors"
 	"net/http"
 	"regexp"
 	"strings"
+
+	"api_demo_with_gorilla.mux/app/models"
+	"api_demo_with_gorilla.mux/app/modules"
 )
 
 type ListAllUsers struct {

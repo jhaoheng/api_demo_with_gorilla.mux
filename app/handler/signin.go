@@ -1,14 +1,15 @@
 package handler
 
 import (
-	"app/config"
-	"app/models"
-	"app/modules"
 	"encoding/json"
 	"errors"
 	"net/http"
 	"strings"
 	"time"
+
+	"api_demo_with_gorilla.mux/app/config"
+	"api_demo_with_gorilla.mux/app/models"
+	"api_demo_with_gorilla.mux/app/modules"
 )
 
 type Signin struct {

@@ -1,10 +1,11 @@
 package handler
 
 import (
-	"app/modules"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"api_demo_with_gorilla.mux/app/modules"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"

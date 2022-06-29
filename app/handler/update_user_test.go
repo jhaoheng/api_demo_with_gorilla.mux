@@ -1,8 +1,6 @@
 package handler
 
 import (
-	"app/models"
-	"app/modules"
 	"bytes"
 	"encoding/json"
 	"io"
@@ -10,6 +8,9 @@ import (
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"api_demo_with_gorilla.mux/app/models"
+	"api_demo_with_gorilla.mux/app/modules"
 
 	"github.com/gorilla/context"
 	"github.com/sirupsen/logrus"

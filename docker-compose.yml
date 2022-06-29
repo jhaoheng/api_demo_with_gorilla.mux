@@ -1,11 +1,12 @@
-version: "3.7"
+version: "3.8"
 services:
 
   nginx:
     image: nginx:1.21.1
     container_name: nginx
     depends_on:
-      - app
+      app:
+        condition: service_healthy
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d
       - ./nginx/ssl:/etc/nginx/ssl
@@ -20,17 +21,24 @@ services:
     image: golang:1.16.5
     container_name: app
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     environment:
       - db_host=mysql
       - csrftoken_only_https=false
     ports:
       - 8080:8080/tcp
     volumes:
-      - ./app:/go/src/app
+      - ./cmd:/go/src/app
       - ./keypair:/tmp/localhost/docker-compose/keypair
     working_dir : /go/src/app
-    command: sh -c "go run main.go"
+    command: sh -c "./docker_app"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 2s
+      timeout: 10s
+      retries: 10
+    restart: always
     networks:
       - api_network
 
@@ -47,6 +55,11 @@ services:
       MYSQL_USER: test
       MYSQL_PASSWORD: test
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -P 3306 -proot | grep 'mysqld is alive' || exit 1"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
     networks:
       - api_network
 

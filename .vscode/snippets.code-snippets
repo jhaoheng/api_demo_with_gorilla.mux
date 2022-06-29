@@ -3,7 +3,7 @@
 		"prefix": "mux_unit_test",
 		"body": [
 			"import (",
-			"\t\"app/models\"",
+			"\t\"api_demo_with_gorilla.mux/app/models\"",
 			"\t\"bytes\"",
 			"\t\"encoding/json\"",
 			"\t\"io\"",

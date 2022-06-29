@@ -1,8 +1,9 @@
 package handler
 
 import (
-	"app/modules"
 	"net/http"
+
+	"api_demo_with_gorilla.mux/app/modules"
 )
 
 type GetCSRFToken struct{}

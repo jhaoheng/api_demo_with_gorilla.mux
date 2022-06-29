@@ -22,20 +22,20 @@
 - docker-compose version 1.29.1, build c34c88b2
 
 # Run API Unit Test
-1. `cd app`
-2. `go test ./handler/ -v -cover`
-3. `go test ./handler/ -coverprofile=cover.out && go tool cover -html=cover.out`
+1. `go test ./app/handler/ -v -cover`
+2. `go test ./app/handler/ -coverprofile=cover.out && go tool cover -html=cover.out`
 
 # 本地執行 API Service
 1. 產生 RS256 keypair for JWT
     1. `cd keypair`
     2. `ssh-keygen -t rsa -b 4096 -m PEM -f jwt_rs256.key`, kepp the passphrase is empty.
     3. `openssl rsa -in jwt_rs256.key -pubout -outform PEM -out jwt_rs256.key.pub`  
-2. `docker-compose up -d && docker logs -f app`
+2. `make dev && docker logs -f app`
 
 # websocket
 1. 執行本地 API service
 2. Run the client, `cd websocket_client && go run main.go`
+    - 執行 api signin, 得到通知
 
 # Postman/Newman, 執行自動測試
 1. 執行本地 API service

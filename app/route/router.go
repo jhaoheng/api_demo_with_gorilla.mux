@@ -1,14 +1,22 @@
 package route
 
 import (
-	"app/handler"
-	"app/middlewares"
+	"net/http"
+
+	"api_demo_with_gorilla.mux/app/handler"
+	"api_demo_with_gorilla.mux/app/middlewares"
 
 	"github.com/gorilla/mux"
 )
 
 func RegisterRoutes(r *mux.Router) {
 	r.Use(middlewares.ShowRequest)
+	//
+	healthRouter := r.PathPrefix("/health").Subrouter()
+	healthRouter.HandleFunc("", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+	}).Methods("GET")
+
 	//
 	getCSRFTokenRouter := r.PathPrefix("/csrf").Subrouter()
 	getCSRFTokenRouter.HandleFunc("", handler.NewGetCSRFToken(nil)).Methods("GET")

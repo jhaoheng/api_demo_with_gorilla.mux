@@ -1,7 +1,8 @@
 keypair/*
 !.gitkeep
 cover.out
-app/models/*_test.go
-!app/models/database_test.go
+api_demo_with_gorilla.mux/app/models/*_test.go
+!api_demo_with_gorilla.mux/app/models/database_test.go
 newman
 swagger.json
+docker_app

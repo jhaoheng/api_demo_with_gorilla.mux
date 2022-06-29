@@ -1,12 +1,13 @@
 package handler
 
 import (
-	"app/models"
-	"app/modules"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"api_demo_with_gorilla.mux/app/models"
+	"api_demo_with_gorilla.mux/app/modules"
 
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/suite"

@@ -1,10 +1,6 @@
 package main
 
 import (
-	"app/config"
-	"app/models"
-	"app/modules"
-	"app/route"
 	"context"
 	"crypto/rand"
 	"flag"
@@ -12,6 +8,11 @@ import (
 	"os"
 	"os/signal"
 	"time"
+
+	"api_demo_with_gorilla.mux/app/config"
+	"api_demo_with_gorilla.mux/app/models"
+	"api_demo_with_gorilla.mux/app/modules"
+	"api_demo_with_gorilla.mux/app/route"
 
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
@@ -44,6 +45,10 @@ func init() {
 }
 
 func main() {
+	Run()
+}
+
+func Run() {
 	var wait time.Duration
 	flag.DurationVar(&wait, "graceful-timeout", time.Second*15, "the duration for which the server gracefully wait for existing connections to finish - e.g. 15s or 1m")
 	flag.Parse()

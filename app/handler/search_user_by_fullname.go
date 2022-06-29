@@ -39,11 +39,6 @@ func SearchUserByFullnameHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *SearchUserByFullname) do() (*SearchUserByFullnameResp, int, error) {
-
-	if err := modules.CheckRegex(api.path.Fullname); err != nil {
-		return nil, http.StatusBadRequest, err
-	}
-
 	result, err := api.model_get_user.SetFullname(api.path.Fullname).Get()
 	if err != nil {
 		return nil, http.StatusBadRequest, err

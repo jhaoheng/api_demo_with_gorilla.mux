@@ -46,11 +46,6 @@ func DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 
 func (api *DeleteUser) do(w http.ResponseWriter, r *http.Request) (*DeleteUserResp, int, error) {
 	//
-	if err := modules.CheckRegex(api.path.DelAccount); err != nil {
-		return nil, http.StatusBadRequest, err
-	}
-
-	//
 	if err := modules.Validate(api.path); err != nil {
 		return nil, http.StatusUnprocessableEntity, err
 	}

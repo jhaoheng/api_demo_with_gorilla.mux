@@ -4,9 +4,7 @@ import (
 	"app/models"
 	"app/modules"
 	"encoding/json"
-	"fmt"
 	"net/http"
-	"strings"
 )
 
 type CreateUser struct {
@@ -20,9 +18,9 @@ type CreateUserPath struct {
 }
 
 type CreateUserBody struct {
-	Account  string `json:"account" validate:"required"`
+	Account  string `json:"account" validate:"required,check_regex"`
 	Password string `json:"password" validate:"required,is_allow_password"`
-	Fullname string `json:"fullname" validate:"required"`
+	Fullname string `json:"fullname" validate:"required,check_regex"`
 }
 
 type CreateUserResp struct {
@@ -62,27 +60,11 @@ func (api *CreateUser) do(w http.ResponseWriter, r *http.Request) (*CreateUserRe
 	}
 
 	//
-	if len(api.body.Account) == 0 ||
-		len(api.body.Password) == 0 ||
-		len(api.body.Fullname) == 0 {
-		err := fmt.Errorf("parameters lost")
-		return nil, http.StatusUnprocessableEntity, err
-	}
-
-	//
-	if err := modules.CheckRegex(api.body.Account, api.body.Password, api.body.Fullname); err != nil {
-		return nil, http.StatusBadRequest, err
-	}
-
-	//
 	err = api.model_create_user.SetAcct(api.body.Account).
 		SetFullname(api.body.Fullname).
 		SetPwd(modules.HashPasswrod(api.body.Password)).Create()
 	if err != nil {
-		if strings.Contains(err.Error(), "duplicate key") {
-			return nil, http.StatusBadRequest, err
-		}
-		return nil, http.StatusBadGateway, err
+		return nil, http.StatusBadRequest, err
 	}
 
 	//

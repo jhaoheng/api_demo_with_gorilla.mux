@@ -11,6 +11,7 @@ var Validator *validator.Validate
 func InitValidate() {
 	Validator = validator.New()
 	Validator.RegisterValidation("is_allow_password", is_allow_password)
+	Validator.RegisterValidation("check_regex", check_regex)
 }
 
 func Validate(obj interface{}) error {
@@ -22,4 +23,9 @@ func is_allow_password(field_level validator.FieldLevel) bool {
 	pattern := "^([A-Za-z0-9]){3,32}$"
 	ok, _ := regexp.MatchString(pattern, field_level.Field().String())
 	return ok
+}
+
+func check_regex(field_level validator.FieldLevel) bool {
+	var re = regexp.MustCompile(`^[A-Za-z0-9]{1,10}$`)
+	return re.MatchString(field_level.Field().String())
 }

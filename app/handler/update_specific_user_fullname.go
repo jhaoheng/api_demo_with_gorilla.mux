@@ -63,11 +63,6 @@ func (api *UpdateUserFullname) do() (*UpdateUserFullnameResp, int, error) {
 	}
 
 	//
-	if err := modules.CheckRegex(api.body.Fullname, api.path.Account); err != nil {
-		return nil, http.StatusBadRequest, err
-	}
-
-	//
 	_, err := api.model_user_update.SetAcct(api.path.Account).Update(models.User{
 		Fullname: api.body.Fullname,
 	})

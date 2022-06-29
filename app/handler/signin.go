@@ -62,11 +62,6 @@ func (api *Signin) do() (*SigninResp, int, error) {
 	}
 
 	//
-	if err := modules.CheckRegex(api.body.Account, api.body.Password); err != nil {
-		return nil, http.StatusBadRequest, err
-	}
-
-	//
 	result, err := api.model_get_user.SetAcct(api.body.Account).Get()
 	if err != nil {
 		return nil, http.StatusBadRequest, err

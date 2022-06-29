@@ -60,13 +60,27 @@ func (s *SuiteCreateUser) BeforeTest(suiteName, testName string) {
 			ExpectCode: http.StatusUnprocessableEntity,
 			ExpectBody: `{"data":null,"error":"Key: 'CreateUserBody.Password' Error:Field validation for 'Password' failed on the 'is_allow_password' tag"}`,
 		},
+		2: {
+			Account:    "max",
+			Password:   "123",
+			Fullname:   "",
+			ExpectCode: http.StatusUnprocessableEntity,
+			ExpectBody: `{"data":null,"error":"Key: 'CreateUserBody.Fullname' Error:Field validation for 'Fullname' failed on the 'required' tag"}`,
+		},
+		3: {
+			Account:    "max",
+			Password:   "12345",
+			Fullname:   "maxhu",
+			ExpectCode: http.StatusBadRequest,
+			ExpectBody: `{"data":null,"error":"Error 1062: Duplicate entry 'account_3' for key 'index'"}`,
+		},
 	}
 	//
 	modules.InitValidate()
 }
 
 func (s *SuiteCreateUser) TestDo() {
-	for _, test_plan := range s.TestPlans {
+	for index, test_plan := range s.TestPlans {
 		//
 		req, err := http.NewRequest(s.ApiMethod, s.ApiUrl, func() io.Reader {
 			b, _ := json.Marshal(CreateUserBody{
@@ -79,14 +93,13 @@ func (s *SuiteCreateUser) TestDo() {
 		if !s.NoError(err) {
 			s.T().Fatal(err)
 		}
-		// context.Set(req, "account", test_plan.AccessAccount)
 		rr := httptest.NewRecorder()
 
 		//
 		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			api := CreateUser{}
-			api.model_create_user = s.mock_create_user(test_plan.Account, test_plan.Password, test_plan.Fullname)
-			api.model_get_user = s.mock_get_user(test_plan.Account, test_plan.Fullname)
+			api.model_create_user = s.mock_create_user(index, test_plan.Account, test_plan.Password, test_plan.Fullname)
+			api.model_get_user = s.mock_get_user(index, test_plan.Account, test_plan.Fullname)
 			payload, status, err := api.do(w, r)
 			modules.NewResp(w, r).Set(modules.RespContect{
 				Data:   payload,
@@ -115,16 +128,21 @@ func (s *SuiteCreateUser) AfterTest(suiteName, testName string) {
 /*
 - mock
 */
-func (s *SuiteCreateUser) mock_create_user(acct, pass, fullname string) *models.MockUser {
+func (s *SuiteCreateUser) mock_create_user(index int, acct, pass, fullname string) *models.MockUser {
 	mock_create_user := models.NewMockUser()
 	mock_create_user.On("SetAcct", acct)
 	mock_create_user.On("SetPwd", modules.HashPasswrod(pass))
 	mock_create_user.On("SetFullname", fullname)
-	mock_create_user.On("Create").Return(nil)
+
+	if index != 3 {
+		mock_create_user.On("Create").Return(nil)
+	} else {
+		mock_create_user.On("Create").Return(fmt.Errorf("Error 1062: Duplicate entry 'account_3' for key 'index'"))
+	}
 	return mock_create_user
 }
 
-func (s *SuiteCreateUser) mock_get_user(acct, fullname string) *models.MockUser {
+func (s *SuiteCreateUser) mock_get_user(index int, acct, fullname string) *models.MockUser {
 	time_at, _ := time.Parse("2006-01-02 15:04:05", "2022-01-01 12:00:00")
 
 	mock_get_user := models.NewMockUser()

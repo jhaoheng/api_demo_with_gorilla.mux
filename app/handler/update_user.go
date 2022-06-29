@@ -47,18 +47,6 @@ func UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *UpdateUser) do() (*UpdateUserResp, int, error) {
-
-	if len(api.body.Fullname) != 0 {
-		if err := modules.CheckRegex(api.body.Fullname); err != nil {
-			return nil, http.StatusBadRequest, err
-		}
-	}
-	if len(api.body.Password) != 0 {
-		if err := modules.CheckRegex(api.body.Password); err != nil {
-			return nil, http.StatusBadRequest, err
-		}
-	}
-
 	//
 	api.model_update_user.SetAcct(api.access_account)
 	_, err := api.model_update_user.Update(models.User{

@@ -39,7 +39,7 @@ func RegisterRoutes(r *mux.Router) {
 		// update me
 		userRouter.HandleFunc("/me", handler.UpdateUserHandler).Methods("PATCH")
 		// update specific user fullname
-		userRouter.HandleFunc("/account/{account}", handler.UpdateUserFullnameHandler).Methods("PATCH")
+		userRouter.HandleFunc("/account/{account}", handler.NewUpdateUserFullname(nil)).Methods("PATCH")
 	}
 
 	// websocket

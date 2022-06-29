@@ -4,7 +4,6 @@ import (
 	"app/models"
 	"app/modules"
 	"encoding/json"
-	"errors"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -13,8 +12,8 @@ import (
 type UpdateUserFullname struct {
 	path              *UpdateUserFullnamePath
 	body              *UpdateUserFullnameBody
-	model_user_update models.IUser
-	model_user_get    models.IUser
+	model_update_user models.IUser
+	model_get_user    models.IUser
 }
 
 type UpdateUserFullnamePath struct {
@@ -32,30 +31,34 @@ type UpdateUserFullnameResp struct {
 	UpdatedAt string `json:"updated_at"`
 }
 
-func UpdateUserFullnameHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	body := &UpdateUserFullnameBody{}
-	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(body)
-	if err != nil {
-		err = errors.New("parameters error")
-		modules.NewResp(w, r).Set(modules.RespContect{Error: err, Stutus: http.StatusBadRequest})
-		return
+func NewUpdateUserFullname(mock_api *UpdateUserFullname) func(w http.ResponseWriter, r *http.Request) {
+	api := UpdateUserFullname{}
+	if mock_api == nil {
+		api = UpdateUserFullname{
+			model_update_user: models.NewUser(),
+			model_get_user:    models.NewUser(),
+		}
+	} else {
+		api = *mock_api
 	}
-	//
-	api := UpdateUserFullname{
-		path: &UpdateUserFullnamePath{
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		api.path = &UpdateUserFullnamePath{
 			Account: vars["account"],
-		},
-		body:              body,
-		model_user_update: models.NewUser(),
-		model_user_get:    models.NewUser(),
+		}
+		api.body = &UpdateUserFullnameBody{}
+		resp, status, err := api.do(w, r)
+		modules.NewResp(w, r).Set(modules.RespContect{Data: resp, Error: err, Stutus: status})
 	}
-	resp, status, err := api.do()
-	modules.NewResp(w, r).Set(modules.RespContect{Data: resp, Error: err, Stutus: status})
 }
 
-func (api *UpdateUserFullname) do() (*UpdateUserFullnameResp, int, error) {
+func (api *UpdateUserFullname) do(w http.ResponseWriter, r *http.Request) (*UpdateUserFullnameResp, int, error) {
+	//
+	api.body = &UpdateUserFullnameBody{}
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(api.body); err != nil {
+		return nil, http.StatusBadRequest, err
+	}
 
 	//
 	if err := modules.Validate(api.body); err != nil {
@@ -63,7 +66,7 @@ func (api *UpdateUserFullname) do() (*UpdateUserFullnameResp, int, error) {
 	}
 
 	//
-	_, err := api.model_user_update.SetAcct(api.path.Account).Update(models.User{
+	_, err := api.model_update_user.SetAcct(api.path.Account).Update(models.User{
 		Fullname: api.body.Fullname,
 	})
 	if err != nil {
@@ -71,7 +74,7 @@ func (api *UpdateUserFullname) do() (*UpdateUserFullnameResp, int, error) {
 	}
 
 	//
-	result, err := api.model_user_get.SetAcct(api.path.Account).Get()
+	result, err := api.model_get_user.SetAcct(api.path.Account).Get()
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
@@ -79,8 +82,8 @@ func (api *UpdateUserFullname) do() (*UpdateUserFullnameResp, int, error) {
 	payload := UpdateUserFullnameResp{
 		Account:   result.Acct,
 		Fullname:  result.Fullname,
-		CreatedAt: result.CreatedAt.String(),
-		UpdatedAt: result.UpdatedAt.String(),
+		CreatedAt: result.CreatedAt.Format("2006-01-02 15:04:05"),
+		UpdatedAt: result.UpdatedAt.Format("2006-01-02 15:04:05"),
 	}
 	return &payload, http.StatusOK, nil
 }

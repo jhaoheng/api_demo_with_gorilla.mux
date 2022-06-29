@@ -1,3 +1,5 @@
+[![CodeFactor](https://www.codefactor.io/repository/github/jhaoheng/api_demo_with_gorilla.mux/badge)](https://www.codefactor.io/repository/github/jhaoheng/api_demo_with_gorilla.mux)
+
 # API demo
 - 使用 Golang 的框架 gorilla/mux framework
 - 使用 RS256 來產生 keypair, 透過 JWT 進行認證

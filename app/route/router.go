@@ -37,7 +37,7 @@ func RegisterRoutes(r *mux.Router) {
 		// delete user by account
 		userRouter.HandleFunc("/account/{account}", handler.DeleteUserHandler).Methods("DELETE")
 		// update me
-		userRouter.HandleFunc("/me", handler.UpdateUserHandler).Methods("PATCH")
+		userRouter.HandleFunc("/me", handler.NewUpdateUser(nil)).Methods("PATCH")
 		// update specific user fullname
 		userRouter.HandleFunc("/account/{account}", handler.NewUpdateUserFullname(nil)).Methods("PATCH")
 	}

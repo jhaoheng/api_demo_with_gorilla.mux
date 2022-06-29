@@ -5,19 +5,15 @@ import (
 	"app/modules"
 	"encoding/json"
 	"net/http"
-
-	"github.com/gorilla/context"
 )
 
 type UpdateUser struct {
-	path              *UpdateUserPath
 	body              *UpdateUserBody
 	access_account    string
 	model_update_user models.IUser
 	model_get_user    models.IUser
 }
 
-type UpdateUserPath struct{}
 type UpdateUserBody struct {
 	Password string `json:"password"`
 	Fullname string `json:"fullname"`
@@ -29,24 +25,33 @@ type UpdateUserResp struct {
 	UpdatedAt string `json:"updated_at"`
 }
 
-func UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
-	body := UpdateUserBody{}
-	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&body)
-	if err != nil {
-		modules.NewResp(w, r).Set(modules.RespContect{Error: err, Stutus: http.StatusBadRequest})
-		return
+func NewUpdateUser(mock_api *UpdateUser) func(w http.ResponseWriter, r *http.Request) {
+	api := UpdateUser{}
+	if mock_api == nil {
+		api = UpdateUser{
+			model_update_user: models.NewUser(),
+			model_get_user:    models.NewUser(),
+		}
+	} else {
+		api = *mock_api
 	}
-	api := UpdateUser{
-		path:           &UpdateUserPath{},
-		body:           &body,
-		access_account: context.Get(r, "account").(string),
+	return func(w http.ResponseWriter, r *http.Request) {
+		// fmt.Println("=====>", r.Context().Value("account").(string))
+		// fmt.Println("====>", context.Get(r, "account"))
+		api.body = &UpdateUserBody{}
+		api.access_account = r.Context().Value("account").(string)
+		resp, status, err := api.do(w, r)
+		modules.NewResp(w, r).Set(modules.RespContect{Data: resp, Error: err, Stutus: status})
 	}
-	resp, status, err := api.do()
-	modules.NewResp(w, r).Set(modules.RespContect{Data: resp, Error: err, Stutus: status})
 }
 
-func (api *UpdateUser) do() (*UpdateUserResp, int, error) {
+func (api *UpdateUser) do(w http.ResponseWriter, r *http.Request) (*UpdateUserResp, int, error) {
+	api.body = &UpdateUserBody{}
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(api.body); err != nil {
+		return nil, http.StatusBadRequest, err
+	}
+
 	//
 	api.model_update_user.SetAcct(api.access_account)
 	_, err := api.model_update_user.Update(models.User{
@@ -67,8 +72,8 @@ func (api *UpdateUser) do() (*UpdateUserResp, int, error) {
 	payload := UpdateUserResp{
 		Account:   result.Acct,
 		Fullname:  result.Fullname,
-		CreatedAt: result.CreatedAt.String(),
-		UpdatedAt: result.UpdatedAt.String(),
+		CreatedAt: result.CreatedAt.Format("2006-01-02 15:04:05"),
+		UpdatedAt: result.UpdatedAt.Format("2006-01-02 15:04:05"),
 	}
 	return &payload, http.StatusOK, nil
 }

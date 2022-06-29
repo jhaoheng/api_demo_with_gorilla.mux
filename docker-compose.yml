@@ -29,10 +29,14 @@ services:
     ports:
       - 8080:8080/tcp
     volumes:
-      - ./cmd:/go/src/app
+      - ./go.mod:/go/src/app/go.mod
+      - ./go.sum:/go/src/app/go.sum
+      - ./app:/go/src/app/app
+      - ./vendor:/go/src/app/vendor
       - ./keypair:/tmp/localhost/docker-compose/keypair
     working_dir : /go/src/app
-    command: sh -c "./docker_app"
+    tty: true
+    command: sh -c "cd app && go run main.go"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 2s

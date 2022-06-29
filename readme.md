@@ -33,7 +33,7 @@
     1. `cd keypair`
     2. `ssh-keygen -t rsa -b 4096 -m PEM -f jwt_rs256.key`, kepp the passphrase is empty.
     3. `openssl rsa -in jwt_rs256.key -pubout -outform PEM -out jwt_rs256.key.pub`  
-2. `make dev && docker logs -f app`
+2. `docker-compose up -d && docker logs -f app`
 
 # websocket
 1. 執行本地 API service

@@ -10,10 +10,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var (
-	default_public_key_path  = ""
-	default_private_key_path = ""
-)
+// var (
+// 	default_public_key_path  = "../../keypair/jwt_rs256.key.pub"
+// 	default_private_key_path = "../../keypair/jwt_rs256.key"
+// )
 
 type JWTSRV struct {
 	publicKey  *rsa.PublicKey
@@ -22,21 +22,21 @@ type JWTSRV struct {
 
 var JWTSrv *JWTSRV
 
-func NewJWTSrv(pubKeyPath, priKeyPath string) *JWTSRV {
+func NewJWTSrv(pubKeyPath, priKeyPath string) (*JWTSRV, error) {
 	if JWTSrv != nil {
-		return JWTSrv
+		return JWTSrv, nil
 	}
-	if len(pubKeyPath) != 0 {
-		default_public_key_path = pubKeyPath
+	if len(pubKeyPath) == 0 {
+		return nil, fmt.Errorf("public_key_path is empty")
 	}
-	if len(priKeyPath) != 0 {
-		default_private_key_path = priKeyPath
+	if len(priKeyPath) == 0 {
+		return nil, fmt.Errorf("private_key_path is empty")
 	}
 
 	return &JWTSRV{
-		publicKey:  setPublicKey(default_public_key_path),
-		privateKey: setPrivateKey(default_private_key_path),
-	}
+		publicKey:  setPublicKey(pubKeyPath),
+		privateKey: setPrivateKey(priKeyPath),
+	}, nil
 }
 
 // Encrtpying ...

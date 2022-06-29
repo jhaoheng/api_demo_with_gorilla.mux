@@ -2,7 +2,6 @@ package handler
 
 import (
 	"app/models"
-	"app/modules"
 	"fmt"
 	"io"
 	"net/http"
@@ -10,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/suite"
 )
@@ -57,8 +57,8 @@ func (s *SuiteSearchUserByFullname) BeforeTest(suiteName, testName string) {
 		},
 	}
 	//
-	s.ApiMethod = ""
-	s.ApiUrl = "/"
+	s.ApiMethod = "GET"
+	s.ApiUrl = fmt.Sprintf("/user/fullname/%v", "maxhu")
 	s.ApiBody = nil
 	s.TestPlans = test_plans
 }
@@ -69,22 +69,16 @@ func (s *SuiteSearchUserByFullname) TestDo() {
 		if !s.NoError(err) {
 			s.T().Fatal(err)
 		}
-		// context.Set(req, "account", test_plan.AccessAccount)
 		rr := httptest.NewRecorder()
-		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			api := SearchUserByFullname{
-				path: &SearchUserByFullnamePath{
-					Fullname: test_plan.Fullname,
-				},
+
+		router := mux.NewRouter()
+		router.HandleFunc("/user/fullname/{fullname}", NewSearchUserByFullname(func() *SearchUserByFullname {
+			mock_api := SearchUserByFullname{
 				model_get_user: s.mock_get_user(index, test_plan.Account, test_plan.Fullname),
 			}
-			payload, status, err := api.do(w, r)
-			modules.NewResp(w, r).Set(modules.RespContect{
-				Data:   payload,
-				Stutus: status,
-				Error:  err,
-			})
-		}).ServeHTTP(rr, req)
+			return &mock_api
+		}()))
+		router.ServeHTTP(rr, req)
 
 		//
 		// fmt.Println("http status_code=>", rr.Code)

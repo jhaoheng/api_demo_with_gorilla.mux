@@ -22,7 +22,11 @@ func JWTValidate(next http.Handler) http.Handler {
 		}
 
 		//
-		jwtsrv := modules.NewJWTSrv(config.CFG.JWT_PUBLIC_KEY_PATH, config.CFG.JWT_PRIVATE_KEY_PATH)
+		jwtsrv, err := modules.NewJWTSrv(config.CFG.JWT_PUBLIC_KEY_PATH, config.CFG.JWT_PRIVATE_KEY_PATH)
+		if err != nil {
+			modules.NewResp(w, r).Set(modules.RespContect{Error: err, Stutus: http.StatusInternalServerError})
+			return
+		}
 		account, ok := jwtsrv.Validating(tokenString)
 		if ok {
 			logrus.Infof("Authenticated user =>%s\n", account)
@@ -35,7 +39,7 @@ func JWTValidate(next http.Handler) http.Handler {
 		//
 		user := models.NewUser()
 		user.SetAcct(account)
-		_, err := user.Get()
+		_, err = user.Get()
 		if err != nil {
 			err = errors.New("forbidden, authorization fail")
 			modules.NewResp(w, r).Set(modules.RespContect{Error: err, Stutus: http.StatusForbidden})

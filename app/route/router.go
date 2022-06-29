@@ -19,7 +19,7 @@ func RegisterRoutes(r *mux.Router) {
 
 	//
 	signinRouter := r.PathPrefix("/signin").Subrouter()
-	signinRouter.HandleFunc("", handler.SigninHandler).Methods("POST")
+	signinRouter.HandleFunc("", handler.NewSignin(nil)).Methods("POST")
 
 	//
 	usersRouter := r.PathPrefix("/users").Subrouter()
@@ -31,7 +31,7 @@ func RegisterRoutes(r *mux.Router) {
 	userRouter.Use(middlewares.JWTValidate)
 	{
 		// get user by fullname
-		userRouter.HandleFunc("/fullname/{fullname}", handler.SearchUserByFullnameHandler).Methods("GET")
+		userRouter.HandleFunc("/fullname/{fullname}", handler.NewSearchUserByFullname(nil)).Methods("GET")
 		// get me
 		userRouter.HandleFunc("/me", handler.GetUserDetailedHandler).Methods("GET")
 		// delete user by account

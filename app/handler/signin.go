@@ -6,19 +6,18 @@ import (
 	"app/modules"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
 )
 
 type Signin struct {
-	path           *SigninPath
-	body           *SigninBody
-	model_get_user models.IUser
+	body                 *SigninBody
+	model_get_user       models.IUser
+	jwt_public_key_path  string
+	jwt_private_key_path string
 }
 
-type SigninPath struct{}
 type SigninBody struct {
 	Account  string `json:"account" validate:"required"`
 	Password string `json:"password" validate:"required"`
@@ -27,33 +26,32 @@ type SigninResp struct {
 	Token string `json:"token"`
 }
 
-func SigninHandler(w http.ResponseWriter, r *http.Request) {
-	//
-	body := &SigninBody{}
-	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(body)
-	if err != nil {
-		modules.NewResp(w, r).Set(modules.RespContect{Error: err, Stutus: http.StatusBadRequest})
-		signinFialNotify(err, r.RequestURI, body.Account)
-		return
+func NewSignin(mock_api *Signin) func(w http.ResponseWriter, r *http.Request) {
+	api := Signin{}
+	if mock_api == nil {
+		api = Signin{
+			model_get_user:       models.NewUser(),
+			jwt_public_key_path:  config.CFG.JWT_PUBLIC_KEY_PATH,
+			jwt_private_key_path: config.CFG.JWT_PRIVATE_KEY_PATH,
+		}
+	} else {
+		api = *mock_api
 	}
-
-	api := Signin{
-		path:           &SigninPath{},
-		body:           body,
-		model_get_user: models.NewUser(),
+	return func(w http.ResponseWriter, r *http.Request) {
+		resp, status, err := api.do(w, r)
+		if err != nil {
+			signinFialNotify(err, r.RequestURI, api.body.Account)
+		}
+		modules.NewResp(w, r).Set(modules.RespContect{Data: resp, Stutus: status, Error: err})
 	}
-	resp, status, err := api.do()
-	if err != nil {
-		signinFialNotify(err, r.RequestURI, api.body.Account)
-	}
-	modules.NewResp(w, r).Set(modules.RespContect{Data: resp, Stutus: status, Error: err})
 }
 
-func (api *Signin) do() (*SigninResp, int, error) {
-	if len(api.body.Account) == 0 || len(api.body.Password) == 0 {
-		err := fmt.Errorf("parameters lost")
-		return nil, http.StatusUnprocessableEntity, err
+func (api *Signin) do(w http.ResponseWriter, r *http.Request) (*SigninResp, int, error) {
+	api.body = &SigninBody{}
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(api.body)
+	if err != nil {
+		return nil, http.StatusBadRequest, err
 	}
 
 	//
@@ -73,9 +71,17 @@ func (api *Signin) do() (*SigninResp, int, error) {
 		err := errors.New("password error")
 		return nil, http.StatusBadRequest, err
 	}
+
+	//
+	jwt, err := modules.NewJWTSrv(api.jwt_public_key_path, api.jwt_private_key_path)
+	if err != nil {
+		return nil, http.StatusInternalServerError, err
+	}
+	token := jwt.Encrtpying(api.body.Account)
+
 	//
 	resp := SigninResp{
-		Token: modules.NewJWTSrv(config.CFG.JWT_PUBLIC_KEY_PATH, config.CFG.JWT_PRIVATE_KEY_PATH).Encrtpying(api.body.Account),
+		Token: token,
 	}
 	return &resp, http.StatusOK, nil
 }

@@ -10,14 +10,12 @@ import (
 
 type SearchUserByFullname struct {
 	path           *SearchUserByFullnamePath
-	body           *SearchUserByFullnameBody
 	model_get_user models.IUser
 }
 
 type SearchUserByFullnamePath struct {
 	Fullname string
 }
-type SearchUserByFullnameBody struct{}
 type SearchUserByFullnameResp struct {
 	Account   string `json:"account"`
 	Fullname  string `json:"fullname"`
@@ -25,17 +23,23 @@ type SearchUserByFullnameResp struct {
 	UpdatedAt string `json:"updated_at"`
 }
 
-func SearchUserByFullnameHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	api := SearchUserByFullname{
-		path: &SearchUserByFullnamePath{
-			Fullname: vars["fullname"],
-		},
-		body:           &SearchUserByFullnameBody{},
-		model_get_user: models.NewUser(),
+func NewSearchUserByFullname(mock_api *SearchUserByFullname) func(w http.ResponseWriter, r *http.Request) {
+	api := SearchUserByFullname{}
+	if mock_api != nil {
+		api = *mock_api
+	} else {
+		api = SearchUserByFullname{
+			model_get_user: models.NewUser(),
+		}
 	}
-	resp, status, err := api.do(w, r)
-	modules.NewResp(w, r).Set(modules.RespContect{Data: resp, Error: err, Stutus: status})
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		api.path = &SearchUserByFullnamePath{
+			Fullname: vars["fullname"],
+		}
+		resp, status, err := api.do(w, r)
+		modules.NewResp(w, r).Set(modules.RespContect{Data: resp, Error: err, Stutus: status})
+	}
 }
 
 func (api *SearchUserByFullname) do(w http.ResponseWriter, r *http.Request) (*SearchUserByFullnameResp, int, error) {

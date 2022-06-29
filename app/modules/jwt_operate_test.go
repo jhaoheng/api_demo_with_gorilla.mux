@@ -10,7 +10,7 @@ func Test_JWT(t *testing.T) {
 	public_key_path := "../../keypair/jwt_rs256.key.pub"
 	private_key_path := "../../keypair/jwt_rs256.key"
 
-	jwtsrv := NewJWTSrv(public_key_path, private_key_path)
+	jwtsrv, _ := NewJWTSrv(public_key_path, private_key_path)
 	tokenSting := jwtsrv.Encrtpying("maxhu")
 
 	if account, ok := jwtsrv.Validating(tokenSting); !ok {

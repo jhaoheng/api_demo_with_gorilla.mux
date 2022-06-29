@@ -9,14 +9,10 @@ import (
 )
 
 type GetUserDetailed struct {
-	path           *GetUserDetailedPath
-	body           *GetUserDetailedBody
 	access_account string
 	model_get_user models.IUser
 }
 
-type GetUserDetailedPath struct{}
-type GetUserDetailedBody struct{}
 type GetUserDetailedResp struct {
 	Account   string `json:"account"`
 	Fullname  string `json:"fullname"`
@@ -24,19 +20,24 @@ type GetUserDetailedResp struct {
 	UpdatedAt string `json:"updated_at"`
 }
 
-func GetUserDetailedHandler(w http.ResponseWriter, r *http.Request) {
-	api := GetUserDetailed{
-		access_account: context.Get(r, "account").(string),
-		model_get_user: models.NewUser(),
-		path:           &GetUserDetailedPath{},
-		body:           &GetUserDetailedBody{},
+func NewGetUserDetailed(mock_api *GetUserDetailed) func(w http.ResponseWriter, r *http.Request) {
+	api := GetUserDetailed{}
+	if mock_api == nil {
+		api = GetUserDetailed{
+			model_get_user: models.NewUser(),
+		}
+	} else {
+		api = *mock_api
 	}
-	payload, status, err := api.do(w, r)
-	modules.NewResp(w, r).Set(modules.RespContect{
-		Data:   payload,
-		Error:  err,
-		Stutus: status,
-	})
+	return func(w http.ResponseWriter, r *http.Request) {
+		api.access_account = context.Get(r, "account").(string)
+		payload, status, err := api.do(w, r)
+		modules.NewResp(w, r).Set(modules.RespContect{
+			Data:   payload,
+			Error:  err,
+			Stutus: status,
+		})
+	}
 }
 
 func (api *GetUserDetailed) do(w http.ResponseWriter, r *http.Request) (*GetUserDetailedResp, int, error) {

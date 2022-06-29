@@ -8,13 +8,9 @@ import (
 )
 
 type CreateUser struct {
-	path              *CreateUserPath
 	body              *CreateUserBody
 	model_create_user models.IUser
 	model_get_user    models.IUser
-}
-
-type CreateUserPath struct {
 }
 
 type CreateUserBody struct {
@@ -30,20 +26,26 @@ type CreateUserResp struct {
 	UpdatedAt string `json:"updated_at"`
 }
 
-func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
-	api := CreateUser{
-		path:              &CreateUserPath{},
-		body:              &CreateUserBody{},
-		model_create_user: models.NewUser(),
-		model_get_user:    models.NewUser(),
+func NewCreateUser(mock_api *CreateUser) func(w http.ResponseWriter, r *http.Request) {
+	api := CreateUser{}
+	if mock_api == nil {
+		api = CreateUser{
+			body:              &CreateUserBody{},
+			model_create_user: models.NewUser(),
+			model_get_user:    models.NewUser(),
+		}
+	} else {
+		api = *mock_api
 	}
-	payload, status, err := api.do(w, r)
-	//
-	modules.NewResp(w, r).Set(modules.RespContect{
-		Data:   payload,
-		Stutus: status,
-		Error:  err,
-	})
+	return func(w http.ResponseWriter, r *http.Request) {
+		payload, status, err := api.do(w, r)
+		//
+		modules.NewResp(w, r).Set(modules.RespContect{
+			Data:   payload,
+			Stutus: status,
+			Error:  err,
+		})
+	}
 }
 
 func (api *CreateUser) do(w http.ResponseWriter, r *http.Request) (*CreateUserResp, int, error) {

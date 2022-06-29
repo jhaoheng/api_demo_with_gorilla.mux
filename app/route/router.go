@@ -15,7 +15,7 @@ func RegisterRoutes(r *mux.Router) {
 
 	//
 	signupRouter := r.PathPrefix("/signup").Subrouter()
-	signupRouter.HandleFunc("", handler.CreateUserHandler).Methods("POST")
+	signupRouter.HandleFunc("", handler.NewCreateUser(nil)).Methods("POST")
 
 	//
 	signinRouter := r.PathPrefix("/signin").Subrouter()
@@ -24,7 +24,7 @@ func RegisterRoutes(r *mux.Router) {
 	//
 	usersRouter := r.PathPrefix("/users").Subrouter()
 	usersRouter.Use(middlewares.JWTValidate)
-	usersRouter.HandleFunc("", handler.ListAllUsersHandler).Methods("GET")
+	usersRouter.HandleFunc("", handler.NewListAllUsers(nil)).Methods("GET")
 
 	//
 	userRouter := r.PathPrefix("/user").Subrouter()
@@ -33,9 +33,9 @@ func RegisterRoutes(r *mux.Router) {
 		// get user by fullname
 		userRouter.HandleFunc("/fullname/{fullname}", handler.NewSearchUserByFullname(nil)).Methods("GET")
 		// get me
-		userRouter.HandleFunc("/me", handler.GetUserDetailedHandler).Methods("GET")
+		userRouter.HandleFunc("/me", handler.NewGetUserDetailed(nil)).Methods("GET")
 		// delete user by account
-		userRouter.HandleFunc("/account/{account}", handler.DeleteUserHandler).Methods("DELETE")
+		userRouter.HandleFunc("/account/{account}", handler.NewDeleteUser(nil)).Methods("DELETE")
 		// update me
 		userRouter.HandleFunc("/me", handler.NewUpdateUser(nil)).Methods("PATCH")
 		// update specific user fullname

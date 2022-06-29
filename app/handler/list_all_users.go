@@ -11,8 +11,6 @@ import (
 
 type ListAllUsers struct {
 	query                *ListAllUsersQuery
-	path                 *ListAllUsersPath
-	body                 *ListAllUsersBody
 	model_get_all_counts models.IUser
 	model_get_users      models.IUser
 }
@@ -21,8 +19,7 @@ type ListAllUsersQuery struct {
 	Paging  string
 	Sorting string
 }
-type ListAllUsersPath struct{}
-type ListAllUsersBody struct{}
+
 type ListAllUsersResp struct {
 	Total int                    `json:"total"`
 	Users []ListAllUsersRespUser `json:"users"`
@@ -35,22 +32,27 @@ type ListAllUsersRespUser struct {
 	UpdatedAt string `json:"updated_at"`
 }
 
-func ListAllUsersHandler(w http.ResponseWriter, r *http.Request) {
-	api := ListAllUsers{
-		query: &ListAllUsersQuery{
+func NewListAllUsers(mock_api *ListAllUsers) func(w http.ResponseWriter, r *http.Request) {
+	api := ListAllUsers{}
+	if mock_api == nil {
+		api = ListAllUsers{
+			model_get_all_counts: models.NewUser(),
+			model_get_users:      models.NewUser(),
+		}
+	} else {
+		api = *mock_api
+	}
+	return func(w http.ResponseWriter, r *http.Request) {
+		api.query = &ListAllUsersQuery{
 			Paging:  r.URL.Query().Get("paging"),
 			Sorting: r.URL.Query().Get("sorting"),
-		},
-		path:                 &ListAllUsersPath{},
-		body:                 &ListAllUsersBody{},
-		model_get_all_counts: models.NewUser(),
-		model_get_users:      models.NewUser(),
+		}
+		resp, status, err := api.do(w, r)
+		modules.NewResp(w, r).Set(modules.RespContect{Data: resp, Error: err, Stutus: status})
 	}
-	resp, status, err := api.do()
-	modules.NewResp(w, r).Set(modules.RespContect{Data: resp, Error: err, Stutus: status})
 }
 
-func (api *ListAllUsers) do() (*ListAllUsersResp, int, error) {
+func (api *ListAllUsers) do(w http.ResponseWriter, r *http.Request) (*ListAllUsersResp, int, error) {
 
 	if err := api.check_paging(); err != nil {
 		return nil, http.StatusBadRequest, err

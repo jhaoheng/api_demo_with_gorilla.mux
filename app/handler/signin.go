@@ -38,9 +38,7 @@ func NewSignin(mock_api *Signin) func(w http.ResponseWriter, r *http.Request) {
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		resp, status, err := api.do(w, r)
-		if err != nil {
-			signinFialNotify(err, r.RequestURI, api.body.Account)
-		}
+		signinFialNotify(err, r.RequestURI, api.body.Account)
 		modules.NewResp(w, r).Set(modules.RespContect{Data: resp, Stutus: status, Error: err})
 	}
 }
@@ -84,9 +82,14 @@ func signinFialNotify(err error, from, account string) {
 		go func() {
 			wsmsg := WSErrMessage{
 				Account: account,
-				Err:     err.Error(),
-				From:    from,
-				At:      time.Now(),
+				Err: func() string {
+					if err != nil {
+						return err.Error()
+					}
+					return ""
+				}(),
+				From: from,
+				At:   time.Now(),
 			}
 			WSChannel <- wsmsg
 		}()

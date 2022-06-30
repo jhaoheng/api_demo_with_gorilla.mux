@@ -29,6 +29,8 @@
 1. `go test ./app/handler/ -v -cover`
 2. `go test ./app/handler/ -coverprofile=cover.out && go tool cover -html=cover.out`
 
+![go_test](./assets/go_test.png)
+
 # 本地執行 API Service
 1. 產生 RS256 keypair for JWT
     1. `cd keypair`
@@ -40,6 +42,8 @@
 1. 執行本地 API service
 2. Run the client, `cd websocket_client && go run main.go`
     - 執行 api signin, 得到通知
+
+![websocket](./assets/websocket.png)
 
 # Postman/Newman, 執行自動測試
 1. 執行本地 API service
@@ -55,5 +59,8 @@
     - [github](https://github.com/go-swagger/go-swagger)
     - [install](https://goswagger.io/install.html)
 - `swagger generate spec -w ./swaggerdoc -o ./swagger.json`
-- 產生文件: `swagger serve swagger.json`
-- 建立文件網站: `swagger serve -F swagger swagger.json`
+- 產生文件網站: 
+    - `swagger serve swagger.json`
+    - `swagger serve -F swagger swagger.json`
+
+![swagger](./assets/swagger.png)

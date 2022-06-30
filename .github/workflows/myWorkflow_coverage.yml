@@ -6,6 +6,7 @@ on:
       - master
     paths:
       - '.github/workflows/myWorkflow_coverage.yml'
+      - './app'
 
 jobs:
   my-job-coverage:

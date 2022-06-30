@@ -6,8 +6,6 @@ import (
 	"api_demo_with_gorilla.mux/app/models"
 	"api_demo_with_gorilla.mux/app/modules"
 
-	"github.com/gorilla/context"
-
 	"github.com/gorilla/mux"
 )
 
@@ -36,7 +34,7 @@ func NewDeleteUser(mock_api *DeleteUser) func(w http.ResponseWriter, r *http.Req
 		api.path = &DeleteUserPath{
 			DelAccount: vars["account"],
 		}
-		api.access_account = context.Get(r, "account").(string)
+		api.access_account = r.Context().Value("account").(string)
 		payload, status, err := api.do(w, r)
 		//
 		modules.NewResp(w, r).Set(modules.RespContect{
@@ -48,11 +46,6 @@ func NewDeleteUser(mock_api *DeleteUser) func(w http.ResponseWriter, r *http.Req
 }
 
 func (api *DeleteUser) do(w http.ResponseWriter, r *http.Request) (*DeleteUserResp, int, error) {
-	//
-	if err := modules.Validate(api.path); err != nil {
-		return nil, http.StatusUnprocessableEntity, err
-	}
-
 	//
 	api.model_del_account.SetAcct(api.path.DelAccount)
 	if _, err := api.model_del_account.Delete(); err != nil {

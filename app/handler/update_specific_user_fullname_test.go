@@ -3,6 +3,7 @@ package handler
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -62,6 +63,34 @@ func (s *SuiteUpdateUserFullname) BeforeTest(suiteName, testName string) {
 			ExpectCode:  http.StatusOK,
 			ExpectBody:  `{"data":{"account":"max","fullname":"","created_at":"2022-01-01 12:00:00","updated_at":"2022-01-01 12:00:00"},"error":"0"}`,
 		},
+		1: {
+			ApiMethod:   "PATCH",
+			ApiUrl:      "/account/max",
+			ApiBody:     &UpdateUserFullnameBody{},
+			TestAccount: "max",
+			ExpectCode:  http.StatusUnprocessableEntity,
+			ExpectBody:  `{"data":null,"error":"Key: 'UpdateUserFullnameBody.Fullname' Error:Field validation for 'Fullname' failed on the 'required' tag"}`,
+		},
+		2: {
+			ApiMethod: "PATCH",
+			ApiUrl:    "/account/max",
+			ApiBody: &UpdateUserFullnameBody{
+				Fullname: "maxhu",
+			},
+			TestAccount: "max",
+			ExpectCode:  http.StatusBadRequest,
+			ExpectBody:  `{"data":null,"error":"db error"}`,
+		},
+		3: {
+			ApiMethod: "PATCH",
+			ApiUrl:    "/account/max",
+			ApiBody: &UpdateUserFullnameBody{
+				Fullname: "maxhu",
+			},
+			TestAccount: "max",
+			ExpectCode:  http.StatusBadRequest,
+			ExpectBody:  `{"data":null,"error":"db error"}`,
+		},
 	}
 	s.TestPlans = test_plans
 }
@@ -108,9 +137,15 @@ func (s *SuiteUpdateUserFullname) AfterTest(suiteName, testName string) {
 func (s *SuiteUpdateUserFullname) mock_update_user(index int, acct, fullname string) *models.MockUser {
 	mock_update_user := models.NewMockUser()
 	mock_update_user.On("SetAcct", acct)
-	mock_update_user.On("Update", models.User{
-		Fullname: fullname,
-	}).Return(1, nil)
+
+	switch index {
+	case 2:
+		mock_update_user.On("Update", models.User{Fullname: fullname}).Return(0, fmt.Errorf("db error"))
+	default:
+		mock_update_user.On("Update", models.User{
+			Fullname: fullname,
+		}).Return(1, nil)
+	}
 	return mock_update_user
 }
 
@@ -120,11 +155,17 @@ func (s *SuiteUpdateUserFullname) mock_get_user(index int, acct string) *models.
 
 	mock_get_user := models.NewMockUser()
 	mock_get_user.On("SetAcct", acct)
-	mock_get_user.On("Get").Return(models.User{
-		Acct:      acct,
-		Fullname:  "",
-		CreatedAt: time_at,
-		UpdatedAt: time_at,
-	}, nil)
+
+	switch index {
+	case 3:
+		mock_get_user.On("Get").Return(models.User{}, fmt.Errorf("db error"))
+	default:
+		mock_get_user.On("Get").Return(models.User{
+			Acct:      acct,
+			Fullname:  "",
+			CreatedAt: time_at,
+			UpdatedAt: time_at,
+		}, nil)
+	}
 	return mock_get_user
 }

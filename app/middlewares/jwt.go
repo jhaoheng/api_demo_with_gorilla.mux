@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"context"
 	"errors"
 	"net/http"
 
@@ -8,7 +9,6 @@ import (
 	"api_demo_with_gorilla.mux/app/models"
 	"api_demo_with_gorilla.mux/app/modules"
 
-	"github.com/gorilla/context"
 	"github.com/sirupsen/logrus"
 )
 
@@ -31,7 +31,11 @@ func JWTValidate(next http.Handler) http.Handler {
 		account, ok := jwtsrv.Validating(tokenString)
 		if ok {
 			logrus.Infof("Authenticated user =>%s\n", account)
-			context.Set(r, "account", account) // use => account := context.Get(r, "account").(string)
+			type AccountType interface{}
+			var account_key AccountType = "account"
+			var account_value AccountType = account
+			ctx := context.WithValue(r.Context(), account_key, account_value)
+			r = r.WithContext(ctx)
 		} else {
 			err := errors.New("forbidden, authorization fail")
 			modules.NewResp(w, r).Set(modules.RespContect{Error: err, Stutus: http.StatusForbidden})

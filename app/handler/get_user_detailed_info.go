@@ -5,8 +5,6 @@ import (
 
 	"api_demo_with_gorilla.mux/app/models"
 	"api_demo_with_gorilla.mux/app/modules"
-
-	"github.com/gorilla/context"
 )
 
 type GetUserDetailed struct {
@@ -31,7 +29,7 @@ func NewGetUserDetailed(mock_api *GetUserDetailed) func(w http.ResponseWriter, r
 		api = *mock_api
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		api.access_account = context.Get(r, "account").(string)
+		api.access_account = r.Context().Value("account").(string)
 		payload, status, err := api.do(w, r)
 		modules.NewResp(w, r).Set(modules.RespContect{
 			Data:   payload,

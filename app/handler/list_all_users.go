@@ -81,8 +81,8 @@ func (api *ListAllUsers) do(w http.ResponseWriter, r *http.Request) (*ListAllUse
 		data := ListAllUsersRespUser{
 			Account:   user.Acct,
 			Fullname:  user.Fullname,
-			CreatedAt: user.CreatedAt.String(),
-			UpdatedAt: user.UpdatedAt.String(),
+			CreatedAt: user.CreatedAt.Format("2006-01-02 15:04:05"),
+			UpdatedAt: user.UpdatedAt.Format("2006-01-02 15:04:05"),
 		}
 		datas = append(datas, data)
 	}

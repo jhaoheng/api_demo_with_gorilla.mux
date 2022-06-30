@@ -2,6 +2,7 @@ package handler
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -12,7 +13,6 @@ import (
 	"api_demo_with_gorilla.mux/app/models"
 	"api_demo_with_gorilla.mux/app/modules"
 
-	"github.com/gorilla/context"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/suite"
 )
@@ -76,7 +76,13 @@ func (s *SuiteUpdateUser) TestDo() {
 		if !s.NoError(err) {
 			s.T().Fatal(err)
 		}
-		context.Set(req, "account", test_plan.AccessAccount)
+		//
+		type AccountType interface{}
+		var account_key AccountType = "account"
+		var account_value AccountType = test_plan.AccessAccount
+		ctx := context.WithValue(req.Context(), account_key, account_value)
+		req = req.WithContext(ctx)
+		//
 		rr := httptest.NewRecorder()
 		http.HandlerFunc(NewUpdateUser(func() *UpdateUser {
 			mock_api := UpdateUser{

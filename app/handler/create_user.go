@@ -31,7 +31,6 @@ func NewCreateUser(mock_api *CreateUser) func(w http.ResponseWriter, r *http.Req
 	api := CreateUser{}
 	if mock_api == nil {
 		api = CreateUser{
-			body:              &CreateUserBody{},
 			model_create_user: models.NewUser(),
 			model_get_user:    models.NewUser(),
 		}
@@ -39,8 +38,8 @@ func NewCreateUser(mock_api *CreateUser) func(w http.ResponseWriter, r *http.Req
 		api = *mock_api
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
+		api.body = &CreateUserBody{}
 		payload, status, err := api.do(w, r)
-		//
 		modules.NewResp(w, r).Set(modules.RespContect{
 			Data:   payload,
 			Stutus: status,

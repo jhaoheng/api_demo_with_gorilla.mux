@@ -65,6 +65,6 @@ func (mock *MockUser) Update(user User) (int64, error) {
 }
 
 func (mock *MockUser) ListBy(paging, sorting string, page_size int) ([]User, error) {
-	args := mock.Called()
+	args := mock.Called(paging, sorting, page_size)
 	return args.Get(0).([]User), args.Error(1)
 }

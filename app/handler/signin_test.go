@@ -91,6 +91,7 @@ func (s *SuiteSignin) BeforeTest(suiteName, testName string) {
 }
 
 func (s *SuiteSignin) TestDo() {
+	WSConnections = 1
 	for index, test_plan := range s.TestPlans {
 		body := func() io.Reader {
 			b, _ := json.Marshal(test_plan.ApiBody)

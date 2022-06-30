@@ -44,6 +44,9 @@
 # Postman/Newman, 執行自動測試
 1. 執行本地 API service
 2. `make test`
+3. result 可整合 aws codebuild 的 report
+
+![newman_autotest](./assets/newman_autotest.png)
 
 # swagger, 產生文件
 - swagger info

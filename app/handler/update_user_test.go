@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -63,16 +64,44 @@ func (s *SuiteUpdateUser) BeforeTest(suiteName, testName string) {
 			ExpectCode:    http.StatusOK,
 			ExpectBody:    `{"data":{"account":"max","fullname":"maxhu","created_at":"2022-01-01 12:00:00","updated_at":"2022-01-01 12:00:00"},"error":"0"}`,
 		},
+		1: {
+			ApiMethod:     "PATCH",
+			ApiUrl:        "/me",
+			ApiBody:       &UpdateUserBody{},
+			AccessAccount: "max",
+			ExpectCode:    http.StatusBadRequest,
+			ExpectBody:    `{"data":null,"error":"invalid character 'b' looking for beginning of value"}`,
+		},
+		2: {
+			ApiMethod:     "PATCH",
+			ApiUrl:        "/me",
+			ApiBody:       &UpdateUserBody{},
+			AccessAccount: "max",
+			ExpectCode:    http.StatusBadRequest,
+			ExpectBody:    `{"data":null,"error":"db error"}`,
+		},
+		3: {
+			ApiMethod:     "PATCH",
+			ApiUrl:        "/me",
+			ApiBody:       &UpdateUserBody{},
+			AccessAccount: "max",
+			ExpectCode:    http.StatusBadRequest,
+			ExpectBody:    `{"data":null,"error":"db error"}`,
+		},
 	}
 	s.TestPlans = test_plans
 }
 
 func (s *SuiteUpdateUser) TestDo() {
 	for index, test_plan := range s.TestPlans {
-		req, err := http.NewRequest(test_plan.ApiMethod, test_plan.ApiUrl, func() io.Reader {
+		body := func() io.Reader {
 			b, _ := json.Marshal(test_plan.ApiBody)
 			return bytes.NewBuffer(b)
-		}())
+		}()
+		if index == 1 {
+			body = bytes.NewBuffer([]byte(`bad body`))
+		}
+		req, err := http.NewRequest(test_plan.ApiMethod, test_plan.ApiUrl, body)
 		if !s.NoError(err) {
 			s.T().Fatal(err)
 		}
@@ -95,7 +124,7 @@ func (s *SuiteUpdateUser) TestDo() {
 		//
 		// fmt.Println("http status_code=>", rr.Code)
 		// fmt.Println("header=>", rr.Header())
-		// fmt.Println("body=>", rr.Body.String())
+		fmt.Println("body=>", rr.Body.String())
 		if rr.Code != test_plan.ExpectCode {
 			s.T().Fatalf("handler returned wrong status code: got %v want %v", rr.Code, test_plan.ExpectCode)
 		}
@@ -113,10 +142,16 @@ func (s *SuiteUpdateUser) AfterTest(suiteName, testName string) {
 func (s *SuiteUpdateUser) mock_update_user(index int, acct, password, fullname string) *models.MockUser {
 	mock_update_user := models.NewMockUser()
 	mock_update_user.On("SetAcct", acct)
-	mock_update_user.On("Update", models.User{
-		Pwd:      modules.HashPasswrod(password),
-		Fullname: fullname,
-	}).Return(1, nil)
+
+	switch index {
+	case 2:
+		mock_update_user.On("Update", models.User{}).Return(0, fmt.Errorf("db error"))
+	default:
+		mock_update_user.On("Update", models.User{
+			Pwd:      modules.HashPasswrod(password),
+			Fullname: fullname,
+		}).Return(1, nil)
+	}
 	return mock_update_user
 }
 
@@ -126,11 +161,17 @@ func (s *SuiteUpdateUser) mock_get_user(index int, acct, fullname string) *model
 
 	mock_get_user := models.NewMockUser()
 	mock_get_user.On("SetAcct", acct)
-	mock_get_user.On("Get").Return(models.User{
-		Acct:      acct,
-		Fullname:  fullname,
-		CreatedAt: time_at,
-		UpdatedAt: time_at,
-	}, nil)
+
+	switch index {
+	case 3:
+		mock_get_user.On("Get").Return(models.User{}, fmt.Errorf("db error"))
+	default:
+		mock_get_user.On("Get").Return(models.User{
+			Acct:      acct,
+			Fullname:  fullname,
+			CreatedAt: time_at,
+			UpdatedAt: time_at,
+		}, nil)
+	}
 	return mock_get_user
 }

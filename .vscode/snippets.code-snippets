@@ -69,7 +69,6 @@
 			"\t\tif !s.NoError(err) {",
 			"\t\t\ts.T().Fatal(err)",
 			"\t\t}",
-			"\t\t// context.Set(req, \"account\", test_plan.AccessAccount)",
 			"\t\trr := httptest.NewRecorder()",
 			"",
 			"\t\trouter := mux.NewRouter()",

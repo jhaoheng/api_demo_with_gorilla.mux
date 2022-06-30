@@ -58,7 +58,6 @@ func (s *SuiteGetCSRFToken) TestDo() {
 		if !s.NoError(err) {
 			s.T().Fatal(err)
 		}
-		// context.Set(req, "account", test_plan.AccessAccount)
 		rr := httptest.NewRecorder()
 
 		router := mux.NewRouter()

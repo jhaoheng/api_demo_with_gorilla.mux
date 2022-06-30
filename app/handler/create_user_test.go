@@ -24,17 +24,18 @@ import (
 - run: `go test -run TestCreateUser` or `go test -v ./...`
 */
 type SuiteCreateUserTestPlan struct {
-	Account    string
-	Password   string
-	Fullname   string
+	// Account    string
+	// Password   string
+	// Fullname   string
+	ApiMethod  string
+	ApiUrl     string
+	ApiBody    CreateUserBody
 	ExpectCode int
 	ExpectBody string
 }
 
 type SuiteCreateUser struct {
 	suite.Suite
-	ApiMethod string
-	ApiUrl    string
 	TestPlans []SuiteCreateUserTestPlan
 }
 
@@ -44,36 +45,57 @@ func TestCreateUser(t *testing.T) {
 
 func (s *SuiteCreateUser) BeforeTest(suiteName, testName string) {
 	logrus.Info("BeforeTest,", s.T().Name())
-	s.ApiMethod = "POST"
-	s.ApiUrl = "/signup"
 	s.TestPlans = []SuiteCreateUserTestPlan{
 		0: {
-			Account:    "max",
-			Password:   "12345",
-			Fullname:   "maxhu",
+			ApiMethod: "POST",
+			ApiUrl:    "/signup",
+			ApiBody: CreateUserBody{
+				Account:  "max",
+				Password: "12345",
+				Fullname: "maxhu",
+			},
 			ExpectCode: http.StatusOK,
 			ExpectBody: `{"data":{"account":"max","fullname":"maxhu","created_at":"2022-01-01 12:00:00","updated_at":"2022-01-01 12:00:00"},"error":"0"}`,
 		},
 		1: {
-			Account:    "max",
-			Password:   "*",
-			Fullname:   "maxhu",
+			ApiMethod: "POST",
+			ApiUrl:    "/signup",
+			ApiBody: CreateUserBody{
+				Account:  "max",
+				Password: "*",
+				Fullname: "maxhu",
+			},
 			ExpectCode: http.StatusUnprocessableEntity,
 			ExpectBody: `{"data":null,"error":"Key: 'CreateUserBody.Password' Error:Field validation for 'Password' failed on the 'is_allow_password' tag"}`,
 		},
 		2: {
-			Account:    "max",
-			Password:   "123",
-			Fullname:   "",
+			ApiMethod: "POST",
+			ApiUrl:    "/signup",
+			ApiBody: CreateUserBody{
+				Account:  "max",
+				Password: "123",
+				Fullname: "",
+			},
 			ExpectCode: http.StatusUnprocessableEntity,
 			ExpectBody: `{"data":null,"error":"Key: 'CreateUserBody.Fullname' Error:Field validation for 'Fullname' failed on the 'required' tag"}`,
 		},
 		3: {
-			Account:    "max",
-			Password:   "12345",
-			Fullname:   "maxhu",
+			ApiMethod: "POST",
+			ApiUrl:    "/signup",
+			ApiBody: CreateUserBody{
+				Account:  "max",
+				Password: "12345",
+				Fullname: "maxhu",
+			},
 			ExpectCode: http.StatusBadRequest,
 			ExpectBody: `{"data":null,"error":"Error 1062: Duplicate entry 'account_3' for key 'index'"}`,
+		},
+		4: {
+			ApiMethod:  "POST",
+			ApiUrl:     "/signup",
+			ApiBody:    CreateUserBody{},
+			ExpectCode: http.StatusBadRequest,
+			ExpectBody: `{"data":null,"error":"json: cannot unmarshal string into Go value of type handler.CreateUserBody"}`,
 		},
 	}
 	//
@@ -81,38 +103,36 @@ func (s *SuiteCreateUser) BeforeTest(suiteName, testName string) {
 }
 
 func (s *SuiteCreateUser) TestDo() {
+	var err error
+	var req *http.Request
 	for index, test_plan := range s.TestPlans {
-		//
-		req, err := http.NewRequest(s.ApiMethod, s.ApiUrl, func() io.Reader {
-			b, _ := json.Marshal(CreateUserBody{
-				Account:  test_plan.Account,
-				Password: test_plan.Password,
-				Fullname: test_plan.Fullname,
-			})
+		var api_body_content interface{} = test_plan.ApiBody
+		if index == 4 {
+			api_body_content = "123"
+		}
+		req, err = http.NewRequest(test_plan.ApiMethod, test_plan.ApiUrl, func() io.Reader {
+			b, _ := json.Marshal(api_body_content)
 			return bytes.NewBuffer(b)
 		}())
+		//
 		if !s.NoError(err) {
 			s.T().Fatal(err)
 		}
 		rr := httptest.NewRecorder()
 
 		//
-		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			api := CreateUser{}
-			api.model_create_user = s.mock_create_user(index, test_plan.Account, test_plan.Password, test_plan.Fullname)
-			api.model_get_user = s.mock_get_user(index, test_plan.Account, test_plan.Fullname)
-			payload, status, err := api.do(w, r)
-			modules.NewResp(w, r).Set(modules.RespContect{
-				Data:   payload,
-				Stutus: status,
-				Error:  err,
-			})
-		}).ServeHTTP(rr, req)
+		http.HandlerFunc(NewCreateUser(func() *CreateUser {
+			api := CreateUser{
+				model_create_user: s.mock_create_user(index, test_plan.ApiBody.Account, test_plan.ApiBody.Password, test_plan.ApiBody.Fullname),
+				model_get_user:    s.mock_get_user(index, test_plan.ApiBody.Account, test_plan.ApiBody.Fullname),
+			}
+			return &api
+		}())).ServeHTTP(rr, req)
 
 		//
 		// fmt.Println("http status_code=>", rr.Code)
 		// fmt.Println("header=>", rr.Header())
-		fmt.Println("body=>", rr.Body.String())
+		// fmt.Println("body=>", rr.Body.String())
 		if rr.Code != test_plan.ExpectCode {
 			s.T().Fatalf("handler returned wrong status code: got %v want %v", rr.Code, test_plan.ExpectCode)
 		}

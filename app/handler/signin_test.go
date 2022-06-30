@@ -3,6 +3,7 @@ package handler
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -66,7 +67,24 @@ func (s *SuiteSignin) BeforeTest(suiteName, testName string) {
 			ApiUrl:     "/signin",
 			ApiBody:    &SigninBody{},
 			ExpectCode: http.StatusUnprocessableEntity,
-			ExpectBody: "",
+			ExpectBody: `{"data":null,"error":"Key: 'SigninBody.Account' Error:Field validation for 'Account' failed on the 'required' tag\nKey: 'SigninBody.Password' Error:Field validation for 'Password' failed on the 'required' tag"}`,
+		},
+		2: {
+			ApiMethod:  "POST",
+			ApiUrl:     "/signin",
+			ApiBody:    &SigninBody{},
+			ExpectCode: http.StatusBadRequest,
+			ExpectBody: `{"data":null,"error":"invalid character 'w' looking for beginning of value"}`,
+		},
+		3: {
+			ApiMethod: "POST",
+			ApiUrl:    "/signin",
+			ApiBody: &SigninBody{
+				Account:  "max",
+				Password: "12345",
+			},
+			ExpectCode: http.StatusBadRequest,
+			ExpectBody: `{"data":null,"error":"db error"}`,
 		},
 	}
 	s.TestPlans = test_plans
@@ -74,10 +92,14 @@ func (s *SuiteSignin) BeforeTest(suiteName, testName string) {
 
 func (s *SuiteSignin) TestDo() {
 	for index, test_plan := range s.TestPlans {
-		req, err := http.NewRequest(test_plan.ApiMethod, test_plan.ApiUrl, func() io.Reader {
+		body := func() io.Reader {
 			b, _ := json.Marshal(test_plan.ApiBody)
 			return bytes.NewBuffer(b)
-		}())
+		}()
+		if index == 2 {
+			body = bytes.NewBuffer([]byte(`wrong body`))
+		}
+		req, err := http.NewRequest(test_plan.ApiMethod, test_plan.ApiUrl, body)
 		if !s.NoError(err) {
 			s.T().Fatal(err)
 		}
@@ -97,13 +119,16 @@ func (s *SuiteSignin) TestDo() {
 		//
 		// fmt.Println("http status_code=>", rr.Code)
 		// fmt.Println("header=>", rr.Header())
-		// fmt.Println("body=>", rr.Body.String())
+		fmt.Println("body=>", rr.Body.String())
 		if rr.Code != test_plan.ExpectCode {
 			s.T().Fatalf("handler returned wrong status code: got %v want %v", rr.Code, test_plan.ExpectCode)
 		}
-		// if rr.Body.String() != test_plan.ExpectBody {
-		// 	s.T().Fatalf("handler returned unexpected body: \n- got %v \n- want %v", rr.Body.String(), test_plan.ExpectBody)
-		// }
+		if rr.Body.String() != test_plan.ExpectBody {
+			if test_plan.ExpectCode == http.StatusOK {
+				continue
+			}
+			s.T().Fatalf("handler returned unexpected body: \n- got %v \n- want %v", rr.Body.String(), test_plan.ExpectBody)
+		}
 	}
 }
 
@@ -117,11 +142,18 @@ func (s *SuiteSignin) mock_get_user(index int, body *SigninBody) *models.MockUse
 
 	mock_get_user := models.NewMockUser()
 	mock_get_user.On("SetAcct", body.Account)
-	mock_get_user.On("Get").Return(models.User{
-		Acct:      body.Account,
-		Pwd:       modules.HashPasswrod(body.Password),
-		CreatedAt: time_at,
-		UpdatedAt: time_at,
-	}, nil)
+	mock_get_user.On("SetPwd", modules.HashPasswrod(body.Password))
+
+	switch index {
+	case 3:
+		mock_get_user.On("Get").Return(models.User{}, fmt.Errorf("db error"))
+	default:
+		mock_get_user.On("Get").Return(models.User{
+			Acct:      body.Account,
+			Pwd:       modules.HashPasswrod(body.Password),
+			CreatedAt: time_at,
+			UpdatedAt: time_at,
+		}, nil)
+	}
 	return mock_get_user
 }

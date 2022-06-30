@@ -2,9 +2,7 @@ package handler
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
-	"strings"
 	"time"
 
 	"api_demo_with_gorilla.mux/app/config"
@@ -61,15 +59,9 @@ func (api *Signin) do(w http.ResponseWriter, r *http.Request) (*SigninResp, int,
 	}
 
 	//
-	result, err := api.model_get_user.SetAcct(api.body.Account).Get()
-	if err != nil {
-		return nil, http.StatusBadRequest, err
-	}
-
-	//
 	hashPwd := modules.HashPasswrod(api.body.Password)
-	if !strings.EqualFold(hashPwd, result.Pwd) {
-		err := errors.New("password error")
+	_, err = api.model_get_user.SetAcct(api.body.Account).SetPwd(hashPwd).Get()
+	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
 

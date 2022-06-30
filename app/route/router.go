@@ -52,5 +52,5 @@ func RegisterRoutes(r *mux.Router) {
 
 	// websocket
 	wsRouter := r.PathPrefix("/ws").Subrouter()
-	wsRouter.HandleFunc("/connection", handler.WebsocketConnection)
+	wsRouter.HandleFunc("/connection", handler.NewWebsocketConnection())
 }

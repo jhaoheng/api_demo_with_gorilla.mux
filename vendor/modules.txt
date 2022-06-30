@@ -57,9 +57,6 @@ github.com/go-playground/universal-translator
 github.com/go-playground/validator
 # github.com/go-sql-driver/mysql v1.6.0
 github.com/go-sql-driver/mysql
-# github.com/gorilla/context v1.1.1
-## explicit
-github.com/gorilla/context
 # github.com/gorilla/csrf v1.7.0
 ## explicit
 github.com/gorilla/csrf

@@ -8,10 +8,11 @@ import (
 
 func ShowRequest(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.RequestURI == "/health" {
-			return
+		switch r.RequestURI {
+		case "/health":
+		default:
+			logrus.Info(r.RequestURI)
 		}
-		logrus.Info(r.RequestURI)
 		next.ServeHTTP(w, r)
 	})
 }

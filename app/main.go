@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"api_demo_with_gorilla.mux/app/config"
+	"api_demo_with_gorilla.mux/app/middlewares"
 	"api_demo_with_gorilla.mux/app/models"
 	"api_demo_with_gorilla.mux/app/modules"
 	"api_demo_with_gorilla.mux/app/route"
@@ -55,6 +56,7 @@ func Run() {
 
 	//
 	r := mux.NewRouter()
+	r.Use(middlewares.ShowRequest)
 	r.Use(set_CSRF()) // CSRF protection
 	route.RegisterRoutes(r)
 	route.WalkingRoute(r)

@@ -77,6 +77,8 @@ github.com/jmespath/go-jmespath
 # github.com/konsorten/go-windows-terminal-sequences v1.0.2
 ## explicit
 github.com/konsorten/go-windows-terminal-sequences
+# github.com/kr/pretty v0.1.0
+## explicit
 # github.com/leodido/go-urn v1.2.1
 ## explicit
 github.com/leodido/go-urn
@@ -101,6 +103,8 @@ github.com/stretchr/testify/suite
 ## explicit
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
+# gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127
+## explicit
 # gopkg.in/go-playground/assert.v1 v1.2.1
 ## explicit
 # gopkg.in/yaml.v3 v3.0.1

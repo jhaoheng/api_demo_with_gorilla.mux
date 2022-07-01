@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script>
+    function TestCORS() {
+      url="http://localhost:8080/cors/success"
+      try {
+          var xhttp = new XMLHttpRequest();
+          xhttp.open("GET", url, false);
+          xhttp.send();
+          alert(xhttp.response);
+      } catch (error) {
+          alert(error.message);
+      }
+    };
+    TestCORS();
+    </script>
+  </head>
+
+<body>
+
+<h2>Local Test CORS, success</h2>
+</body>
+</html>

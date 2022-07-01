@@ -59,12 +59,10 @@ func RegisterRoutes(r *mux.Router) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.WriteHeader(200)
-		w.Write([]byte(`ok`))
 	}).Methods("GET")
 	corsRouter.HandleFunc("/fail", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "only.this.domain.can.access")
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.WriteHeader(200)
-		w.Write([]byte(`ok`))
 	}).Methods("GET")
 }

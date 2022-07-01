@@ -10,8 +10,12 @@ var Validator *validator.Validate
 
 func InitValidate() {
 	Validator = validator.New()
-	Validator.RegisterValidation("is_allow_password", is_allow_password)
-	Validator.RegisterValidation("check_regex", check_regex)
+	if err := Validator.RegisterValidation("is_allow_password", is_allow_password); err != nil {
+		panic(err)
+	}
+	if err := Validator.RegisterValidation("check_regex", check_regex); err != nil {
+		panic(err)
+	}
 }
 
 func Validate(obj interface{}) error {

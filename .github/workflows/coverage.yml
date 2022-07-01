@@ -5,7 +5,7 @@ on:
     branches:
       - master
     paths:
-      - '.github/workflows/myWorkflow_coverage.yml'
+      - '.github/workflows/coverage.yml'
       - 'app/**'
 
 jobs:

@@ -66,10 +66,11 @@ func Run() {
 	srv := &http.Server{
 		Addr: ":8080",
 		// to set timeouts to avoid Slowloris attacks.
-		WriteTimeout: time.Second * 15,
-		ReadTimeout:  time.Second * 15,
-		IdleTimeout:  time.Second * 60,
-		Handler:      r,
+		WriteTimeout:      time.Second * 15,
+		ReadTimeout:       time.Second * 15,
+		IdleTimeout:       time.Second * 60,
+		ReadHeaderTimeout: time.Second * 15,
+		Handler:           r,
 	}
 
 	logrus.Info("api start")
@@ -86,14 +87,18 @@ func Run() {
 	ctx, cancel := context.WithTimeout(context.Background(), wait)
 	defer cancel()
 	//
-	srv.Shutdown(ctx)
+	if err := srv.Shutdown(ctx); err != nil {
+		panic(err)
+	}
 	logrus.Info("shutting down")
 	os.Exit(0)
 }
 
 func set_CSRF() func(http.Handler) http.Handler {
 	key := make([]byte, 32)
-	rand.Read(key)
+	if _, err := rand.Read(key); err != nil {
+		panic(err)
+	}
 	return csrf.Protect(
 		key,
 		csrf.Secure(config.CFG.CSRFTOKEN_ONLY_HTTPS),

@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/csrf"
+	"github.com/sirupsen/logrus"
 )
 
 type IResp interface{}
@@ -50,5 +51,8 @@ func (r *Resp) Set(resp RespContect) {
 		}(),
 	}
 	b, _ := json.Marshal(tmp)
-	w.Write(b)
+	_, err := w.Write(b)
+	if err != nil {
+		logrus.Error(err)
+	}
 }

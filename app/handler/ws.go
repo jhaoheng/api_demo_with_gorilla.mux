@@ -36,7 +36,8 @@ func WebsocketConnection(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		logrus.Info("ws_client connection close")
 		WSConnections--
-		conn.Close()
+		err := conn.Close()
+		logrus.Error(err)
 	}()
 
 	for {

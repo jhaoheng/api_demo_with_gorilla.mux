@@ -28,10 +28,10 @@ func (kp *JWTKeyPair) SetJWTKeypair(keypair embed.FS) (*JWTKeyPair, error) {
 
 func (kp *JWTKeyPair) load_from_local(keypair embed.FS) error {
 	var err error
-	if kp.pub_key, err = keypair.ReadFile("keypair/jwt_rs256.key.pub"); err != nil {
+	if kp.pub_key, err = keypair.ReadFile("jwt_rs256.key.pub"); err != nil {
 		return err
 	}
-	if kp.pri_key, err = keypair.ReadFile("keypair/jwt_rs256.key"); err != nil {
+	if kp.pri_key, err = keypair.ReadFile("jwt_rs256.key"); err != nil {
 		return err
 	}
 	return nil

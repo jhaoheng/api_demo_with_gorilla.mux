@@ -23,14 +23,21 @@ type ConfigObj struct {
 	JWT_PRIVATE_KEY_PATH string
 }
 
-func NewConfig(env string, jwt_keypair *embed.FS) *ConfigObj {
-	//
-	keypair, err := NewJWTKeyPair().SetJWTKeypair(*jwt_keypair)
+//go:embed jwt_rs256.key.pub
+//go:embed jwt_rs256.key
+var jwt_keypair_embed embed.FS
+
+func LoadJWTKeyPair() {
+	keypair, err := NewJWTKeyPair().SetJWTKeypair(jwt_keypair_embed)
 	if err != nil {
 		panic(err)
 	}
 	JWTPubKey = keypair.pub_key
 	JWTPriKey = keypair.pri_key
+}
+
+func NewConfig(env string) *ConfigObj {
+	LoadJWTKeyPair()
 	//
 	CFG = &ConfigObj{}
 	switch env {

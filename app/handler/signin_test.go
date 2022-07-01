@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"api_demo_with_gorilla.mux/app/config"
 	"api_demo_with_gorilla.mux/app/models"
 	"api_demo_with_gorilla.mux/app/modules"
 
@@ -48,6 +49,8 @@ func TestSignin(t *testing.T) {
 }
 
 func (s *SuiteSignin) BeforeTest(suiteName, testName string) {
+	config.JWTPubKey = []byte(config.FakePubKey)
+	config.JWTPriKey = []byte(config.FakePriKey)
 	logrus.Info("BeforeTest, ", s.T().Name())
 	modules.InitValidate()
 	//

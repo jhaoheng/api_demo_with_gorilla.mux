@@ -2,7 +2,6 @@ package modules
 
 import (
 	"crypto/rsa"
-	"embed"
 	"fmt"
 	"time"
 
@@ -69,9 +68,6 @@ func (j *JWTSRV) Validating(tokenString string) (account string, ok bool) {
 	}
 
 	return claims["sub"].(string), true
-}
-
-func get_key_from_embed(keypair_folder embed.FS) {
 }
 
 func set_public_key(key []byte) (public_key *rsa.PublicKey) {

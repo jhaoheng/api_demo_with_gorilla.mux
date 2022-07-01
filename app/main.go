@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"crypto/rand"
-	"embed"
 	"flag"
 	"net/http"
 	"os"
@@ -20,9 +19,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-//go:embed keypair
-var jwt_keypair embed.FS
-
 func init() {
 	env := os.Getenv("env")
 	if env == "prod" {
@@ -36,7 +32,7 @@ func init() {
 			TimestampFormat: "2006-01-02 15:04:05",
 		})
 	}
-	c := config.NewConfig(env, &jwt_keypair)
+	c := config.NewConfig(env)
 	models.NewDBMySQL(models.DBSet{
 		Host:    c.DB_HOST,
 		User:    c.DB_USERNAME,

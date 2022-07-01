@@ -6,6 +6,6 @@ import (
 )
 
 func Test_NewConfig(t *testing.T) {
-	c := NewConfig("", nil)
+	c := NewConfig("")
 	fmt.Println(c)
 }

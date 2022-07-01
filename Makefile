@@ -11,6 +11,6 @@ build:
 
 key:
 	@\
-	cd app/keypair;\
+	cd app/config;\
 	ssh-keygen -t rsa -b 4096 -m PEM -f jwt_rs256.key;\
 	openssl rsa -in jwt_rs256.key -pubout -outform PEM -out jwt_rs256.key.pub;

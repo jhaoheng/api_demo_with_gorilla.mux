@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"flag"
+	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -96,8 +97,13 @@ func set_CSRF() func(http.Handler) http.Handler {
 	return csrf.Protect(
 		key,
 		csrf.Secure(config.CFG.CSRFTOKEN_ONLY_HTTPS),
-		// csrf.TrustedOrigins([]string{""}),
+		csrf.TrustedOrigins([]string{"*"}), // ex: localhost, www.google.com
 		csrf.Domain("localhost"),
 		csrf.SameSite(csrf.SameSiteLaxMode),
+		csrf.ErrorHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			err := fmt.Errorf("forbidden - CSRF token invalid")
+			status := http.StatusForbidden
+			modules.NewResp(w, r).Set(modules.RespContect{Stutus: status, Error: err})
+		})),
 	)
 }

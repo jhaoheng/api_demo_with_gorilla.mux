@@ -29,9 +29,11 @@ func NewResp(w http.ResponseWriter, r *http.Request) *Resp {
 
 func (r *Resp) Set(resp RespContect) {
 	w := r.writer
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("X-CSRF-Token", csrf.Token(r.request))
-	w.Header().Set("Content-Type", "application/json")
+	if resp.Stutus == http.StatusOK {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("X-CSRF-Token", csrf.Token(r.request))
+		w.Header().Set("Content-Type", "application/json")
+	}
 	w.WriteHeader(resp.Stutus)
 
 	type Content struct {

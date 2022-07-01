@@ -23,10 +23,7 @@ jobs:
 
       - name: Produce Coverage report
         run: |
-          cd keypair
-          ssh-keygen -t rsa -b 4096 -m PEM -f jwt_rs256.key 
-          openssl rsa -in jwt_rs256.key -pubout -outform PEM -out jwt_rs256.key.pub 
-          cd -
+          make key
           go test ./app/handler/ -coverprofile=coverage.out
           ls -al
 

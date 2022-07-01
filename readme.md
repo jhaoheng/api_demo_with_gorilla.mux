@@ -1,7 +1,9 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/jhaoheng/api_demo_with_gorilla.mux/badge)](https://www.codefactor.io/repository/github/jhaoheng/api_demo_with_gorilla.mux)
 [![codecov](https://codecov.io/gh/jhaoheng/api_demo_with_gorilla.mux/branch/master/graph/badge.svg?token=YI1WZVYNCQ)](https://codecov.io/gh/jhaoheng/api_demo_with_gorilla.mux)
+
 [![coverage](https://github.com/jhaoheng/api_demo_with_gorilla.mux/actions/workflows/coverage.yml/badge.svg?branch=master)](https://github.com/jhaoheng/api_demo_with_gorilla.mux/actions/workflows/coverage.yml)
 [![security scan](https://github.com/jhaoheng/api_demo_with_gorilla.mux/actions/workflows/gosec.yml/badge.svg?branch=master)](https://github.com/jhaoheng/api_demo_with_gorilla.mux/actions/workflows/gosec.yml)
+[![staticcheck](https://github.com/jhaoheng/api_demo_with_gorilla.mux/actions/workflows/staticcheck.yml/badge.svg?branch=master)](https://github.com/jhaoheng/api_demo_with_gorilla.mux/actions/workflows/staticcheck.yml)
 
 # API demo
 - 使用 Golang 的框架 gorilla/mux framework

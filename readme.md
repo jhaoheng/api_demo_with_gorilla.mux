@@ -19,7 +19,7 @@
     - SQL injection
 
 # 版本
-- golang 1.16.5
+- golang 1.17.11
 - gorilla/mux, v1.8.0
 - gorm, v1.21.11
 - postman, collection v2.1, newman, 5.3.2

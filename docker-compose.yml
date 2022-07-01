@@ -18,7 +18,7 @@ services:
       - api_network
 
   app:
-    image: golang:1.16.5
+    image: golang:1.17.11
     container_name: app
     depends_on:
       mysql:

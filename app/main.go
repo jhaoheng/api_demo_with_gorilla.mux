@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"crypto/rand"
+	"embed"
 	"flag"
 	"net/http"
 	"os"
@@ -19,6 +20,9 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+//go:embed keypair
+var jwt_keypair embed.FS
+
 func init() {
 	env := os.Getenv("env")
 	if env == "prod" {
@@ -32,7 +36,7 @@ func init() {
 			TimestampFormat: "2006-01-02 15:04:05",
 		})
 	}
-	c := config.NewConfig(env)
+	c := config.NewConfig(env, &jwt_keypair)
 	models.NewDBMySQL(models.DBSet{
 		Host:    c.DB_HOST,
 		User:    c.DB_USERNAME,
@@ -55,7 +59,7 @@ func Run() {
 
 	//
 	r := mux.NewRouter()
-	r.Use(setCSRF()) // CSRF protection
+	r.Use(set_CSRF()) // CSRF protection
 	route.RegisterRoutes(r)
 	route.WalkingRoute(r)
 
@@ -88,7 +92,7 @@ func Run() {
 	os.Exit(0)
 }
 
-func setCSRF() func(http.Handler) http.Handler {
+func set_CSRF() func(http.Handler) http.Handler {
 	key := make([]byte, 32)
 	rand.Read(key)
 	return csrf.Protect(

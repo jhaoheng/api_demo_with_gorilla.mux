@@ -64,7 +64,7 @@ func (api *Signin) do(w http.ResponseWriter, r *http.Request) (*SigninResp, int,
 	}
 
 	//
-	jwt, err := modules.NewJWTSrv(api.jwt_public_key_path, api.jwt_private_key_path)
+	jwt, err := modules.NewJWTSrv(config.JWTPubKey, config.JWTPriKey)
 	if err != nil {
 		return nil, http.StatusInternalServerError, err
 	}

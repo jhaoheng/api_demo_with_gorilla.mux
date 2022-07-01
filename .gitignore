@@ -1,4 +1,4 @@
-keypair/*
+app/keypair/*
 !.gitkeep
 cover.out
 api_demo_with_gorilla.mux/app/models/*_test.go

@@ -23,7 +23,7 @@ func JWTValidate(next http.Handler) http.Handler {
 		}
 
 		//
-		jwtsrv, err := modules.NewJWTSrv(config.CFG.JWT_PUBLIC_KEY_PATH, config.CFG.JWT_PRIVATE_KEY_PATH)
+		jwtsrv, err := modules.NewJWTSrv(config.JWTPubKey, config.JWTPriKey)
 		if err != nil {
 			modules.NewResp(w, r).Set(modules.RespContect{Error: err, Stutus: http.StatusInternalServerError})
 			return

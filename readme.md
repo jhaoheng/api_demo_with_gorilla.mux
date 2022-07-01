@@ -32,10 +32,8 @@
 ![go_test](./assets/go_test.png)
 
 # 本地執行 API Service
-1. 產生 RS256 keypair for JWT
-    1. `cd keypair`
-    2. `ssh-keygen -t rsa -b 4096 -m PEM -f jwt_rs256.key`, kepp the passphrase is empty.
-    3. `openssl rsa -in jwt_rs256.key -pubout -outform PEM -out jwt_rs256.key.pub`  
+1. 產生 JWT 用於驗證的 RS256 keypair, 在本地端, `make key`
+    - If cloud deploy, don't use it, load key from cloud storage, ex: `AWS Secret Manager`, `AWS Parameter Store`
 2. `docker-compose up -d && docker logs -f app`
 
 # websocket

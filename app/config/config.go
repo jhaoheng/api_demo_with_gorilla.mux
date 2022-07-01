@@ -1,11 +1,15 @@
 package config
 
 import (
+	"embed"
 	"os"
 	"strings"
 )
 
 var CFG *ConfigObj
+
+var JWTPubKey []byte
+var JWTPriKey []byte
 
 type ConfigObj struct {
 	DB_HOST     string
@@ -19,13 +23,17 @@ type ConfigObj struct {
 	JWT_PRIVATE_KEY_PATH string
 }
 
-func NewConfig(env string) *ConfigObj {
+func NewConfig(env string, jwt_keypair *embed.FS) *ConfigObj {
+	//
+	keypair, err := NewJWTKeyPair().SetJWTKeypair(*jwt_keypair)
+	if err != nil {
+		panic(err)
+	}
+	JWTPubKey = keypair.pub_key
+	JWTPriKey = keypair.pri_key
+	//
 	CFG = &ConfigObj{}
 	switch env {
-	// case "stg":
-	// 	CFG.set_stg()
-	// case "prod":
-	// 	CFG.set_prod()
 	default:
 		CFG.set_dev()
 	}
